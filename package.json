@@ -1,0 +1,7 @@
+{
+  "name": "doorway-prototype",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ]
+}
