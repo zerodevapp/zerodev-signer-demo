@@ -2,48 +2,50 @@
 
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-// import { useTurnkey } from '@turnkey/sdk-react';
+import { useTurnkey } from '@turnkey/sdk-react';
+
+import { SessionStatus } from '../components/SessionStatus';
 
 type TSubOrgFormData = {
   email: string;
+  targetPublicKey: string;
 };
 
 type ResponseBody = {
   subOrganizationId: string;
   wallet: { addresses: string[] };
 };
-export default function CreateSubOrganization() {
-  // const { passkeyClient } = useTurnkey();
 
-  // Use form handler for suborg creation
+type Status = 'idle' | 'in_progress' | 'success' | 'error';
+
+export default function CreateSubOrganization() {
+  const { authIframeClient } = useTurnkey();
+  const [status, setStatus] = useState<Status>('idle');
+
   const { register: subOrgFormRegister, handleSubmit: subOrgFormSubmit } =
     useForm<TSubOrgFormData>();
 
-  // Maintain state
   const [createSubOrganizationResponse, setCreateSubOrganizationResponse] =
     useState<ResponseBody | null>(null);
 
   const createSubOrg = async (data: TSubOrgFormData) => {
-    // const credential = await passkeyClient?.createUserPasskey({
-    //   publicKey: {
-    //     // This is the name of the passkey that will be displayed to the user
-    //     rp: {
-    //       name: 'Wallet Passkey',
-    //     },
-    //     user: {
-    //       // We can use the username as the name and display name
-    //       name: 'Default User Name',
-    //       displayName: 'Default User Name',
-    //     },
-    //   },
-    // });
+    try {
+      setStatus('in_progress');
 
-    const response = await fetch('/api/users', {
-      method: 'POST',
-      body: JSON.stringify({ email: data.email }),
-    });
+      const response = await fetch('/api/users', {
+        method: 'POST',
+        body: JSON.stringify({
+          email: data.email,
+          targetPublicKey: await authIframeClient.getEmbeddedPublicKey(),
+        }),
+      });
 
-    setCreateSubOrganizationResponse((await response.json()) as ResponseBody);
+      setCreateSubOrganizationResponse(await response.json());
+      setStatus('success');
+    } catch (error) {
+      console.error(error);
+      setStatus('error');
+    }
   };
 
   return (
@@ -51,17 +53,10 @@ export default function CreateSubOrganization() {
       <h1 className="text-3xl font-bold text-gray-900 mb-8">
         Welcome to Doorway
       </h1>
-      {createSubOrganizationResponse ? (
-        <div className="text-center flex flex-col">
-          <span>
-            <b>Sub-organization id:</b>{' '}
-            {createSubOrganizationResponse.subOrganizationId}
-          </span>
-          <span>
-            <b>Wallet:</b> {createSubOrganizationResponse.wallet.addresses[0]}
-          </span>
-        </div>
-      ) : (
+      <div className="min-w-[512px]">
+        <SessionStatus />
+      </div>
+      {status === 'idle' && (
         <form
           onSubmit={subOrgFormSubmit(createSubOrg)}
           className="flex flex-col gap-6 p-6 bg-white rounded-lg shadow-md max-w-md w-full"
@@ -81,6 +76,19 @@ export default function CreateSubOrganization() {
             Continue
           </button>
         </form>
+      )}
+      {status === 'in_progress' && <div>Loading...</div>}
+      {status === 'error' && <div>There was an error.</div>}
+      {status === 'success' && (
+        <div className="text-center flex flex-col">
+          <span>
+            <b>Sub-organization id:</b>{' '}
+            {createSubOrganizationResponse.subOrganizationId}
+          </span>
+          <span>
+            <b>Wallet:</b> {createSubOrganizationResponse.wallet.addresses[0]}
+          </span>
+        </div>
       )}
     </div>
   );
