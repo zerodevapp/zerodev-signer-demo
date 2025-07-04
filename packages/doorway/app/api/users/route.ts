@@ -1,0 +1,44 @@
+import { Turnkey } from '@turnkey/sdk-server';
+import { DEFAULT_ETHEREUM_ACCOUNTS } from '@turnkey/sdk-browser';
+
+const turnkeyServer = new Turnkey({
+  apiBaseUrl: 'https://api.turnkey.com',
+  apiPrivateKey: process.env.TURNKEY_API_PRIVATE_KEY!,
+  apiPublicKey: process.env.TURNKEY_API_PUBLIC_KEY!,
+  defaultOrganizationId: process.env.NEXT_PUBLIC_TURNKEY_ORGANIZATION_ID!,
+}).apiClient();
+
+type RequestBody = {
+  email: string;
+};
+
+export async function POST(request: Request) {
+  try {
+    const body = (await request.json()) as RequestBody;
+
+    const response = await turnkeyServer.createSubOrganization({
+      subOrganizationName: body.email,
+      rootUsers: [
+        {
+          userName: body.email,
+          userEmail: body.email,
+          apiKeys: [],
+          authenticators: [],
+          oauthProviders: [],
+        },
+      ],
+      rootQuorumThreshold: 1,
+      wallet: {
+        walletName: 'Default Wallet',
+        accounts: DEFAULT_ETHEREUM_ACCOUNTS,
+      },
+    });
+
+    return Response.json(response, { status: 201 });
+  } catch (reason) {
+    const message =
+      reason instanceof Error ? reason.message : 'Unexpected error';
+
+    return Response.json({ message }, { status: 500 });
+  }
+}
