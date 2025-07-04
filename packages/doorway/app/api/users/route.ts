@@ -10,13 +10,20 @@ const turnkeyServer = new Turnkey({
 
 type RequestBody = {
   email: string;
+  targetPublicKey: string;
+};
+
+type Response = {
+  email: string;
+  subOrganizationId: string;
+  wallet: { addresses: string[] };
 };
 
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as RequestBody;
 
-    const response = await turnkeyServer.createSubOrganization({
+    const createSubOrgResponse = await turnkeyServer.createSubOrganization({
       subOrganizationName: body.email,
       rootUsers: [
         {
@@ -34,11 +41,33 @@ export async function POST(request: Request) {
       },
     });
 
+    console.log(createSubOrgResponse);
+
+    const { subOrganizationId, wallet } = createSubOrgResponse;
+
+    const emailAuthResponse = await turnkeyServer.emailAuth({
+      email: body.email,
+      targetPublicKey: body.targetPublicKey,
+      timestampMs: String(Date.now()),
+      organizationId: subOrganizationId,
+      emailCustomization: {
+        magicLinkTemplate: 'http://localhost:3000/auth/verify?bundle=%s',
+      },
+    });
+
+    console.log(emailAuthResponse);
+
+    const response: Response = {
+      email: body.email,
+      subOrganizationId,
+      wallet,
+    };
+
     return Response.json(response, { status: 201 });
   } catch (reason) {
     const message =
       reason instanceof Error ? reason.message : 'Unexpected error';
-
+    console.error(message);
     return Response.json({ message }, { status: 500 });
   }
 }
