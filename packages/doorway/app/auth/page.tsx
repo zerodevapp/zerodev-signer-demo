@@ -4,8 +4,6 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTurnkey } from '@turnkey/sdk-react';
 
-import { SessionStatus } from '../components/SessionStatus';
-
 type TSubOrgFormData = {
   email: string;
   targetPublicKey: string;
@@ -53,9 +51,6 @@ export default function CreateSubOrganization() {
       <h1 className="text-3xl font-bold text-gray-900 mb-8">
         Welcome to Doorway
       </h1>
-      <div className="min-w-[512px]">
-        <SessionStatus />
-      </div>
       {status === 'idle' && (
         <form
           onSubmit={subOrgFormSubmit(createSubOrg)}

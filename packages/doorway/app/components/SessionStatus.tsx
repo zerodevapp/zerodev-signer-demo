@@ -7,6 +7,9 @@ import { Session as TurnkeySession } from '@turnkey/sdk-browser';
 export function SessionStatus() {
   const { turnkey } = useTurnkey();
   const [session, setSession] = useState<TurnkeySession | undefined>(undefined);
+  const [isHovered, setIsHovered] = useState(false);
+
+  const hasSession = typeof session !== 'undefined';
 
   useEffect(() => {
     async function updateSession() {
@@ -18,44 +21,50 @@ export function SessionStatus() {
     updateSession();
   }, [turnkey]);
 
-  async function logout() {
-    await turnkey.logout();
-    const turnkeySession = await turnkey.getSession();
-
-    setSession(turnkeySession);
-  }
-
-  if (typeof session === 'undefined') {
-    return (
-      <div className="flex flex-col gap-2 border-2 rounded-md p-2 w-full">
-        <div className="flex flex-col">
-          <span>
-            <b>Session:</b> No
-          </span>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="flex flex-col gap-2 border-2 rounded-md p-2">
-      <div className="flex flex-col">
-        <span>
-          <b>Session:</b> Yes
-        </span>
-        <span>
-          <b>Session Type:</b> {session.sessionType}
-        </span>
-        <span>
-          <b>Session Expiry:</b> {new Date(session.expiry).toLocaleString()}
-        </span>
-      </div>
-      <button
-        onClick={logout}
-        className="bg-black text-white rounded-md cursor-pointer"
+    <div className="fixed bottom-4 right-4 z-50">
+      <div
+        className="relative"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
       >
-        Logout
-      </button>
+        <button
+          className={`w-12 h-12 rounded-full border-2 flex items-center justify-center text-sm font-bold ${
+            hasSession
+              ? 'text-green-600 border-green-600'
+              : 'text-red-600 border-red-600'
+          }`}
+        >
+          {hasSession ? '✓' : '✗'}
+        </button>
+
+        {isHovered && (
+          <div
+            className={`absolute bottom-14 right-0 bg-white border-2 rounded-lg p-4 min-w-96 z-50 ${
+              hasSession ? 'border-green-600' : 'border-red-600'
+            }`}
+          >
+            <div className="flex flex-col gap-2">
+              <div className="flex flex-col">
+                <span>
+                  <b>Session:</b> {hasSession ? 'Yes' : 'No'}
+                </span>
+                {hasSession && (
+                  <>
+                    <span>
+                      <b>Session Type:</b> {session.sessionType}
+                    </span>
+                    <span>
+                      <b>Session Expiry:</b>{' '}
+                      {new Date(session.expiry).toLocaleString()}
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
