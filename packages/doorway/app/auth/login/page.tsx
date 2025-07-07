@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useTurnkey } from '@turnkey/sdk-react';
 import { useForm } from 'react-hook-form';
+import { useRouter } from 'next/navigation';
 
 import { useAuthMiddleware } from '../../hooks/useAuthMiddleware';
 
@@ -11,12 +12,13 @@ type Status = 'idle' | 'in_progress' | 'success' | 'error';
 type FormData = { email: string };
 
 export default function Register() {
-  const { authIframeClient } = useTurnkey();
+  const router = useRouter();
+  const { authIframeClient, passkeyClient, turnkey } = useTurnkey();
   const { isLoading } = useAuthMiddleware(false);
   const { register: registerFormField, handleSubmit } = useForm<FormData>();
   const [status, setStatus] = useState<Status>('idle');
 
-  async function register(data: { email: string }) {
+  async function loginViaEmail(data: { email: string }) {
     try {
       setStatus('in_progress');
 
@@ -34,6 +36,24 @@ export default function Register() {
     } catch (error) {
       console.error(error);
       setStatus('error');
+    }
+  }
+
+  async function loginViaPasskey() {
+    try {
+      await passkeyClient.loginWithPasskey({
+        sessionType: 'SESSION_TYPE_READ_ONLY',
+      });
+
+      const session = await turnkey.getSession();
+
+      if (typeof session === 'undefined') {
+        return alert('Session is undefined after login with passkey.');
+      }
+
+      router.push('/dashboard');
+    } catch (error) {
+      alert(error);
     }
   }
 
@@ -57,7 +77,10 @@ export default function Register() {
     <div className="flex flex-col gap-4 p-4 bg-white rounded-lg shadow-md max-w-md w-full">
       <div className="flex flex-col gap-8">
         <h2 className="text-xl font-bold">Login</h2>
-        <form className="flex flex-col gap-4" onSubmit={handleSubmit(register)}>
+        <form
+          className="flex flex-col gap-4"
+          onSubmit={handleSubmit(loginViaEmail)}
+        >
           <div className="flex flex-col gap-1">
             <label className="text-gray-700">Email</label>
             <input
@@ -70,7 +93,14 @@ export default function Register() {
             type="submit"
             className="px-4 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
           >
-            Continue
+            Continue with Email
+          </button>
+          <button
+            type="button"
+            onClick={loginViaPasskey}
+            className="px-4 py-2 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors"
+          >
+            Continue with Passkey
           </button>
         </form>
         <span className="text-sm">
