@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTurnkey } from '@turnkey/sdk-react';
 
+import { useAuthMiddleware } from '../hooks/useAuthMiddleware';
+
 type TSubOrgFormData = {
   email: string;
   targetPublicKey: string;
@@ -18,6 +20,7 @@ type Status = 'idle' | 'in_progress' | 'success' | 'error';
 
 export default function CreateSubOrganization() {
   const { authIframeClient } = useTurnkey();
+  const { isLoading } = useAuthMiddleware(false);
   const [status, setStatus] = useState<Status>('idle');
 
   const { register: subOrgFormRegister, handleSubmit: subOrgFormSubmit } =
@@ -45,6 +48,10 @@ export default function CreateSubOrganization() {
       setStatus('error');
     }
   };
+
+  if (isLoading) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">

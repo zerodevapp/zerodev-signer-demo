@@ -3,13 +3,20 @@
 import { useRouter } from 'next/navigation';
 import { useTurnkey } from '@turnkey/sdk-react';
 
+import { useAuthMiddleware } from '../hooks/useAuthMiddleware';
+
 export default function Dashboard() {
   const router = useRouter();
+  const { isLoading } = useAuthMiddleware(true);
   const { turnkey } = useTurnkey();
 
   async function logout() {
     await turnkey.logout();
     router.push('/auth');
+  }
+
+  if (isLoading) {
+    return null;
   }
 
   return (
