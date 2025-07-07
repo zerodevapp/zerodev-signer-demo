@@ -1,6 +1,8 @@
 import { Turnkey } from '@turnkey/sdk-server';
 import { DEFAULT_ETHEREUM_ACCOUNTS } from '@turnkey/sdk-browser';
 
+import { createUser } from '../../services/users';
+
 const turnkeyServer = new Turnkey({
   apiBaseUrl: 'https://api.turnkey.com',
   apiPrivateKey: process.env.TURNKEY_API_PRIVATE_KEY!,
@@ -45,15 +47,19 @@ export async function POST(request: Request) {
 
     const { subOrganizationId, wallet } = createSubOrgResponse;
 
-    const emailAuthResponse = await turnkeyServer.emailAuth({
-      email: body.email,
-      targetPublicKey: body.targetPublicKey,
-      timestampMs: String(Date.now()),
-      organizationId: subOrganizationId,
-      emailCustomization: {
-        magicLinkTemplate: 'http://localhost:3000/auth/verify?bundle=%s',
-      },
-    });
+    await createUser({ email: body.email, subOrganizationId });
+
+    const emailAuthResponse = await fetch(
+      'http://localhost:3000/api/auth/email',
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          email: body.email,
+          organizationId: subOrganizationId,
+          targetPublicKey: body.targetPublicKey,
+        }),
+      }
+    );
 
     console.log(emailAuthResponse);
 
