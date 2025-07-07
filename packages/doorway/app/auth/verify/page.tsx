@@ -23,5 +23,5 @@ export default function AuthVerify() {
     tryLoginWithBundle();
   }, [authIframeClient]);
 
-  return <div>Loading...</div>;
+  return <span>...</span>;
 }

@@ -38,7 +38,9 @@ export default function RootLayout({
               process.env.NEXT_PUBLIC_TURNKEY_ORGANIZATION_ID!,
           }}
         >
-          {children}
+          <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
+            {children}
+          </div>
           <SessionStatus />
         </TurnkeyProvider>
       </body>
