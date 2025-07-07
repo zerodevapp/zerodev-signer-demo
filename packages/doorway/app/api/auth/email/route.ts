@@ -1,6 +1,6 @@
 import { Turnkey } from '@turnkey/sdk-server';
 
-import { getUser } from '../../../services/users';
+import { getUserByEmail } from '../../_services/users';
 
 const turnkeyServer = new Turnkey({
   apiBaseUrl: 'https://api.turnkey.com',
@@ -18,7 +18,7 @@ type RequestBody = {
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as RequestBody;
-    const user = await getUser({ email: body.email });
+    const user = await getUserByEmail(body.email);
 
     const response = await turnkeyServer.emailAuth({
       email: body.email,

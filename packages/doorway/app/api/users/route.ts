@@ -1,7 +1,7 @@
 import { Turnkey } from '@turnkey/sdk-server';
 import { DEFAULT_ETHEREUM_ACCOUNTS } from '@turnkey/sdk-browser';
 
-import { createUser } from '../../services/users';
+import { storeUser } from '../_services/users';
 
 const turnkeyServer = new Turnkey({
   apiBaseUrl: 'https://api.turnkey.com',
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
 
     const { subOrganizationId, wallet } = createSubOrgResponse;
 
-    await createUser({ email: body.email, subOrganizationId });
+    await storeUser({ email: body.email, subOrganizationId });
 
     const emailAuthResponse = await fetch(
       'http://localhost:3000/api/auth/email',
