@@ -8,6 +8,7 @@ import { TGetAuthenticatorsResponse } from '@turnkey/sdk-browser/dist/__generate
 import {
   Address,
   createPublicClient,
+  formatEther,
   Hex,
   http,
   parseEther,
@@ -36,6 +37,30 @@ const sepoliaClient = createPublicClient({
   chain: sepolia,
   transport: http(process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL),
 });
+
+function useEthBalance(address: Address | undefined) {
+  const [balance, setBalance] = useState<bigint>(BigInt(0));
+
+  useEffect(() => {
+    async function fetchBalance() {
+      if (!address) {
+        return;
+      }
+
+      try {
+        const fetchedBalance = await sepoliaClient.getBalance({ address });
+        setBalance(fetchedBalance);
+      } catch (error) {
+        console.error('Error fetching balance:', error);
+        setBalance(BigInt(0));
+      }
+    }
+
+    fetchBalance();
+  }, [address]);
+
+  return balance;
+}
 
 export default function Dashboard() {
   const { isLoading } = useAuthMiddleware(true);
@@ -67,6 +92,8 @@ export default function Dashboard() {
     () => walletAccounts?.[0].accounts?.[0].address,
     [walletAccounts]
   );
+
+  const balance = useEthBalance(address);
 
   const logout = useCallback(async () => {
     await turnkey?.logout();
@@ -266,23 +293,24 @@ export default function Dashboard() {
       <div className="flex flex-col items-start">
         <h3 className="text-lg font-bold">Wallets</h3>
         {wallets && (
-          <ul>
-            {wallets.map((wallet, index) => (
-              <li key={wallet.walletId}>
-                * {wallet.walletName} ({wallet.walletId})
-                <ul className="pl-4">
-                  <li>* Imported: {wallet.imported ? 'Yes' : 'No'}</li>
-                  <li>* Exported: {wallet.exported ? 'Yes' : 'No'}</li>
-                  <li>
-                    * Accounts:{' '}
-                    {walletAccounts[index].accounts
-                      .map((account) => account.address)
-                      .join(', ')}
-                  </li>
-                </ul>
-              </li>
-            ))}
-          </ul>
+          <div className="flex flex-col">
+            <span>
+              {' '}
+              * {wallets[0].walletName} ({wallets[0].walletId})
+            </span>
+            <div className="pl-4">
+              <span>
+                * Default Wallet Account (
+                {walletAccounts[0].accounts[0].walletAccountId})
+              </span>
+              <div className="pl-4 flex flex-col">
+                <span>* Address: {walletAccounts[0].accounts[0].address}</span>
+                <span>
+                  * Balance: {`${formatEther(balance)} ETH (on Sepolia)`}
+                </span>
+              </div>
+            </div>
+          </div>
         )}
       </div>
 
