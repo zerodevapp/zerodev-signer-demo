@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTurnkey } from '@turnkey/sdk-react';
+import { Session as TurnkeySession } from '@turnkey/sdk-browser';
 import { useForm } from 'react-hook-form';
 import { TGetAuthenticatorsResponse } from '@turnkey/sdk-browser/dist/__generated__/sdk_api_types';
 
@@ -23,6 +24,7 @@ export default function Dashboard() {
     useForm<AddPasskeyFormData>();
 
   const [status, setStatus] = useState<Status>('idle');
+  const [session, setSession] = useState<TurnkeySession | undefined>(undefined);
 
   const [whoami, setWhoami] = useState<
     { userId: string; username: string; organizationId: string } | undefined
@@ -32,6 +34,16 @@ export default function Dashboard() {
   >(undefined);
   const [wallets, setWallets] = useState<any>(undefined);
   const [walletAccounts, setWalletAccounts] = useState<any>(undefined);
+
+  useEffect(() => {
+    async function updateSession() {
+      if (turnkey) {
+        setSession(await turnkey.getSession());
+      }
+    }
+
+    updateSession();
+  }, [turnkey]);
 
   useEffect(() => {
     async function init() {
@@ -130,7 +142,10 @@ export default function Dashboard() {
         <span>Turnkey Email: {whoami?.username}</span>
         <span>Turnkey User Id: {whoami?.userId}</span>
         <span>Turnkey Sub-organization Id: {whoami?.organizationId}</span>
-        <span>Authenticated via: {client?.authClient?.toUpperCase()}</span>
+        <span>-</span>
+        <span>Session: {client?.authClient?.toUpperCase()}</span>
+        <span>Session Type: {session.sessionType}</span>
+        <span>Session Expiry: {new Date(session.expiry).toLocaleString()}</span>
       </div>
       <div className="flex flex-col items-start">
         <h3 className="text-lg font-bold">Passkeys</h3>

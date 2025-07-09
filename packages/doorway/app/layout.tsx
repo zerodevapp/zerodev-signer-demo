@@ -3,7 +3,6 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import { TurnkeyProvider } from '@turnkey/sdk-react';
 
 import './globals.css';
-import { SessionStatus } from './components/SessionStatus';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -41,7 +40,6 @@ export default function RootLayout({
           <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
             {children}
           </div>
-          <SessionStatus />
         </TurnkeyProvider>
       </body>
     </html>
