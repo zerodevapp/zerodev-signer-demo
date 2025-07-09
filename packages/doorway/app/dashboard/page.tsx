@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTurnkey } from '@turnkey/sdk-react';
 import { Session as TurnkeySession } from '@turnkey/sdk-browser';
@@ -35,15 +35,28 @@ export default function Dashboard() {
   const [wallets, setWallets] = useState<any>(undefined);
   const [walletAccounts, setWalletAccounts] = useState<any>(undefined);
 
+  const logout = useCallback(async () => {
+    await turnkey?.logout();
+    await indexedDbClient?.clear();
+
+    location.href = '/auth';
+  }, [turnkey, indexedDbClient]);
+
   useEffect(() => {
     async function updateSession() {
       if (turnkey) {
-        setSession(await turnkey.getSession());
+        const _session = await turnkey.getSession();
+
+        if (Date.now() >= _session.expiry) {
+          await logout();
+        } else {
+          setSession(await turnkey.getSession());
+        }
       }
     }
 
     updateSession();
-  }, [turnkey]);
+  }, [turnkey, logout]);
 
   useEffect(() => {
     async function init() {
@@ -121,11 +134,6 @@ export default function Dashboard() {
       setStatus('error');
       alert(err);
     }
-  }
-
-  async function logout() {
-    await turnkey.logout();
-    router.push('/auth/login');
   }
 
   if (isLoading) {
