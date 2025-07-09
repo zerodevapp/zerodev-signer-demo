@@ -3,6 +3,8 @@ import { DEFAULT_ETHEREUM_ACCOUNTS } from '@turnkey/sdk-browser';
 
 import { storeUser } from '../_services/users';
 
+const appUrl = process.env.NEXT_PUBLIC_APP_URL!;
+
 const turnkeyServer = new Turnkey({
   apiBaseUrl: 'https://api.turnkey.com',
   apiPrivateKey: process.env.TURNKEY_API_PRIVATE_KEY!,
@@ -49,17 +51,14 @@ export async function POST(request: Request) {
 
     await storeUser({ email: body.email, subOrganizationId });
 
-    const emailAuthResponse = await fetch(
-      'http://localhost:3000/api/auth/email',
-      {
-        method: 'POST',
-        body: JSON.stringify({
-          email: body.email,
-          organizationId: subOrganizationId,
-          targetPublicKey: body.targetPublicKey,
-        }),
-      }
-    );
+    const emailAuthResponse = await fetch(`${appUrl}/api/auth/email`, {
+      method: 'POST',
+      body: JSON.stringify({
+        email: body.email,
+        organizationId: subOrganizationId,
+        targetPublicKey: body.targetPublicKey,
+      }),
+    });
 
     console.log(emailAuthResponse);
 

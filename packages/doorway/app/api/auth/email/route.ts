@@ -2,6 +2,8 @@ import { Turnkey } from '@turnkey/sdk-server';
 
 import { getUserByEmail } from '../../_services/users';
 
+const appUrl = process.env.NEXT_PUBLIC_APP_URL!;
+
 const turnkeyServer = new Turnkey({
   apiBaseUrl: 'https://api.turnkey.com',
   apiPrivateKey: process.env.TURNKEY_API_PRIVATE_KEY!,
@@ -26,7 +28,7 @@ export async function POST(request: Request) {
       timestampMs: String(Date.now()),
       organizationId: user.subOrganizationId,
       emailCustomization: {
-        magicLinkTemplate: 'http://localhost:3000/auth/verify?bundle=%s',
+        magicLinkTemplate: `${appUrl}/auth/verify?bundle=%s`,
       },
     });
 
