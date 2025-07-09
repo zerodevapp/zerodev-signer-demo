@@ -1,27 +1,54 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTurnkey } from '@turnkey/sdk-react';
 import { Session as TurnkeySession } from '@turnkey/sdk-browser';
 import { useForm } from 'react-hook-form';
 import { TGetAuthenticatorsResponse } from '@turnkey/sdk-browser/dist/__generated__/sdk_api_types';
+import {
+  Address,
+  createPublicClient,
+  Hex,
+  http,
+  parseEther,
+  parseGwei,
+  serializeTransaction,
+  TransactionSerializable,
+} from 'viem';
+import { sepolia } from 'viem/chains';
 
 import { useAuthMiddleware } from '../hooks/useAuthMiddleware';
+import { useTransactionDialog } from '../contexts/TransactionDialogContext';
 
 type AddPasskeyFormData = {
   authenticatorName: string;
 };
 
+type SendTransactionFormData = {
+  to: string;
+  data: string;
+  value: string;
+};
+
 type Status = 'idle' | 'in_progress' | 'success' | 'error';
 
+const sepoliaClient = createPublicClient({
+  chain: sepolia,
+  transport: http(process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL),
+});
+
 export default function Dashboard() {
-  const router = useRouter();
   const { isLoading } = useAuthMiddleware(true);
   const { turnkey, passkeyClient, authIframeClient, indexedDbClient, client } =
     useTurnkey();
   const { register: registerFormField, handleSubmit } =
     useForm<AddPasskeyFormData>();
+  const {
+    register: registerSendTransactionFormField,
+    handleSubmit: handleSendTransactionSubmit,
+  } = useForm<SendTransactionFormData>();
+
+  const { openDialog } = useTransactionDialog();
 
   const [status, setStatus] = useState<Status>('idle');
   const [session, setSession] = useState<TurnkeySession | undefined>(undefined);
@@ -34,6 +61,12 @@ export default function Dashboard() {
   >(undefined);
   const [wallets, setWallets] = useState<any>(undefined);
   const [walletAccounts, setWalletAccounts] = useState<any>(undefined);
+
+  // assuming just using the first wallet and account for simplicity
+  const address: Address | undefined = useMemo(
+    () => walletAccounts?.[0].accounts?.[0].address,
+    [walletAccounts]
+  );
 
   const logout = useCallback(async () => {
     await turnkey?.logout();
@@ -136,6 +169,37 @@ export default function Dashboard() {
     }
   }
 
+  async function sendTransaction({ to, data, value }: SendTransactionFormData) {
+    const transaction: TransactionSerializable = {
+      chainId: 11155111,
+      maxFeePerGas: parseGwei('0.1'),
+      maxPriorityFeePerGas: parseGwei('0.1'),
+      to: to as Address,
+      data: (data as Hex) || '0x',
+      value: parseEther(value),
+      nonce: await sepoliaClient.getTransactionCount({ address }),
+    };
+    transaction.gas = await sepoliaClient.estimateGas(transaction);
+
+    if (!(await openDialog(transaction))) {
+      return;
+    }
+
+    const unsignedTransaction = serializeTransaction(transaction);
+
+    const { signedTransaction } = await client.signTransaction({
+      type: 'TRANSACTION_TYPE_ETHEREUM',
+      unsignedTransaction,
+      signWith: address,
+    });
+
+    const hash = await sepoliaClient.sendRawTransaction({
+      serializedTransaction: `0x${signedTransaction}`,
+    });
+
+    window.open(`https://sepolia.etherscan.io/tx/${hash}`, '_blank');
+  }
+
   if (isLoading) {
     return null;
   }
@@ -154,28 +218,39 @@ export default function Dashboard() {
         <span>Session: {client?.authClient?.toUpperCase()}</span>
         <span>Session Type: {session.sessionType}</span>
         <span>Session Expiry: {new Date(session.expiry).toLocaleString()}</span>
+
+        <div className="flex flex-row justify-end mt-2">
+          <button
+            onClick={logout}
+            className="bg-white text-blue-600 hover:text-white min-w-32 hover:border-blue-700 rounded-md py-1 px-2 border-2 border-blue-600 cursor-pointer hover:bg-blue-700 transition-colors"
+          >
+            Logout
+          </button>
+        </div>
       </div>
       <div className="flex flex-col items-start">
         <h3 className="text-lg font-bold">Passkeys</h3>
         {authenticators?.authenticators.length === 0 ? (
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 w-full">
             <div>You haven't added a Passkey yet.</div>
             <form
-              className="flex flex-row gap-2"
+              className="flex flex-col w-full gap-2"
               onSubmit={handleSubmit(addPasskey)}
             >
               <input
                 {...registerFormField('authenticatorName')}
                 placeholder="Enter passkey name"
-                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
-              <button
-                disabled={status === 'in_progress'}
-                type="submit"
-                className="bg-blue-600 hover:border-blue-700 min-w-32 text-white rounded-md py-1 px-2 border-2 border-blue-600 cursor-pointer hover:bg-blue-700 transition-colors"
-              >
-                Add Passkey
-              </button>
+              <div className="flex flex-row justify-end">
+                <button
+                  disabled={status === 'in_progress'}
+                  type="submit"
+                  className="bg-blue-600 hover:border-blue-700 min-w-32 text-white rounded-md py-1 px-2 border-2 border-blue-600 cursor-pointer hover:bg-blue-700 transition-colors"
+                >
+                  Add Passkey
+                </button>
+              </div>
             </form>
           </div>
         ) : (
@@ -210,14 +285,38 @@ export default function Dashboard() {
           </ul>
         )}
       </div>
+
       <div className="flex flex-col items-start">
-        <h3 className="text-lg font-bold">Other</h3>
-        <button
-          onClick={logout}
-          className="bg-white text-blue-600 hover:text-white min-w-32 hover:border-blue-700 rounded-md py-1 px-2 border-2 border-blue-600 cursor-pointer hover:bg-blue-700 transition-colors"
+        <h3 className="text-lg font-bold">Send Transaction</h3>
+
+        <form
+          className="flex flex-col w-full gap-2"
+          onSubmit={handleSendTransactionSubmit(sendTransaction)}
         >
-          Logout
-        </button>
+          <input
+            {...registerSendTransactionFormField('to')}
+            placeholder="Enter to address"
+            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+          <input
+            {...registerSendTransactionFormField('data')}
+            placeholder="Enter calldata (optional)"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+          <input
+            {...registerSendTransactionFormField('value')}
+            placeholder="Enter callvalue in ETH"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+          <div className="flex flex-row justify-end">
+            <button
+              type="submit"
+              className="bg-blue-600 hover:border-blue-700 min-w-32 text-white rounded-md py-1 px-2 border-2 border-blue-600 cursor-pointer hover:bg-blue-700 transition-colors"
+            >
+              Send Transaction
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
