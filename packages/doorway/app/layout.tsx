@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import { TurnkeyProvider } from '@turnkey/sdk-react';
 
 import './globals.css';
+import { TransactionDialogProvider } from './contexts/TransactionDialogContext';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -37,9 +38,11 @@ export default function RootLayout({
               process.env.NEXT_PUBLIC_TURNKEY_ORGANIZATION_ID!,
           }}
         >
-          <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
-            {children}
-          </div>
+          <TransactionDialogProvider>
+            <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
+              {children}
+            </div>
+          </TransactionDialogProvider>
         </TurnkeyProvider>
       </body>
     </html>
