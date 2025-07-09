@@ -1,11 +1,10 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useTurnkey } from '@turnkey/sdk-react';
 
 export default function AuthVerify() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const { authIframeClient } = useTurnkey();
 
@@ -16,7 +15,8 @@ export default function AuthVerify() {
           bundle: searchParams.get('bundle'),
         });
 
-        router.push('/dashboard');
+        // Turnkey doesn't play well with client-side routing, so we gotta refresh
+        location.href = '/dashboard';
       }
     }
 

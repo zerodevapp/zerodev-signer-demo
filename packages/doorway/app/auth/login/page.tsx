@@ -41,8 +41,14 @@ export default function Register() {
 
   async function loginViaPasskey() {
     try {
+      const indexedDbClient = await turnkey.indexedDbClient();
+      await indexedDbClient.init();
+
+      const publicKey = await indexedDbClient.getPublicKey();
+
       await passkeyClient.loginWithPasskey({
         sessionType: 'SESSION_TYPE_READ_ONLY',
+        publicKey,
       });
 
       const session = await turnkey.getSession();
@@ -51,7 +57,8 @@ export default function Register() {
         return alert('Session is undefined after login with passkey.');
       }
 
-      router.push('/dashboard');
+      // Turnkey doesn't play well with client-side routing, so we gotta refresh
+      location.href = '/dashboard';
     } catch (error) {
       alert(error);
     }

@@ -10,7 +10,7 @@ const nextConfig: NextConfig = {
       },
       {
         source: '/auth',
-        destination: '/auth/register',
+        destination: '/auth/login',
         permanent: false,
       },
     ];
