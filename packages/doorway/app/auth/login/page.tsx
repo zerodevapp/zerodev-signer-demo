@@ -1,22 +1,33 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTurnkey } from '@turnkey/sdk-react';
 import { useForm } from 'react-hook-form';
-import { useRouter } from 'next/navigation';
 
 import { useAuthMiddleware } from '../../hooks/useAuthMiddleware';
 
 type Status = 'idle' | 'in_progress' | 'success' | 'error';
 type FormData = { email: string };
 
-export default function Register() {
-  const router = useRouter();
-  const { authIframeClient, passkeyClient, turnkey } = useTurnkey();
+export default function Login() {
+  const { authIframeClient, indexedDbClient, passkeyClient, turnkey } =
+    useTurnkey();
   const { isLoading } = useAuthMiddleware(false);
   const { register: registerFormField, handleSubmit } = useForm<FormData>();
   const [status, setStatus] = useState<Status>('idle');
+
+  // Clear IndexedDB on visiting the login page, so there are no conflicting keys
+  useEffect(() => {
+    async function clearIndexedDb() {
+      if (indexedDbClient) {
+        await indexedDbClient.clear();
+        console.log('IndexedDB cleared');
+      }
+    }
+
+    clearIndexedDb();
+  }, [indexedDbClient]);
 
   async function loginViaEmail(data: { email: string }) {
     try {
@@ -41,13 +52,11 @@ export default function Register() {
 
   async function loginViaPasskey() {
     try {
-      const indexedDbClient = await turnkey.indexedDbClient();
       await indexedDbClient.init();
-
       const publicKey = await indexedDbClient.getPublicKey();
 
       await passkeyClient.loginWithPasskey({
-        sessionType: 'SESSION_TYPE_READ_ONLY',
+        sessionType: 'SESSION_TYPE_READ_WRITE',
         publicKey,
       });
 

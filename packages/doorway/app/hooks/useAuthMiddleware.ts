@@ -24,8 +24,6 @@ export function useAuthMiddleware(requireAuth: boolean = true) {
         const session = await turnkey.getSession();
         const hasSession = typeof session !== 'undefined';
 
-        console.log({ session });
-
         if (requireAuth && !hasSession) {
           router.push('/auth');
           return;

@@ -76,7 +76,9 @@ export default function Dashboard() {
   const { openDialog } = useTransactionDialog();
 
   const [status, setStatus] = useState<Status>('idle');
-  const [session, setSession] = useState<TurnkeySession | undefined>(undefined);
+  const [session, setSession] = useState<
+    TurnkeySession | undefined | 'loading'
+  >('loading');
 
   const [whoami, setWhoami] = useState<
     { userId: string; username: string; organizationId: string } | undefined
@@ -107,10 +109,12 @@ export default function Dashboard() {
       if (turnkey) {
         const _session = await turnkey.getSession();
 
-        if (Date.now() >= _session.expiry) {
-          await logout();
+        if (_session && Date.now() < _session.expiry) {
+          // session is there and not expired
+          setSession(_session);
         } else {
-          setSession(await turnkey.getSession());
+          // session is not there or expired
+          await logout();
         }
       }
     }
@@ -227,7 +231,7 @@ export default function Dashboard() {
     window.open(`https://sepolia.etherscan.io/tx/${hash}`, '_blank');
   }
 
-  if (isLoading) {
+  if (isLoading || session === 'loading') {
     return null;
   }
 
