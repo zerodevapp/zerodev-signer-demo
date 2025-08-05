@@ -938,6 +938,13 @@
   resolved "https://registry.yarnpkg.com/@noble/ciphers/-/ciphers-1.3.0.tgz#f64b8ff886c240e644e5573c097f86e5b43676dc"
   integrity sha512-2I0gnIVPtfnMw9ee9h1dJG7tp81+8Ob3OJb3Mv37rx5L40/b0i7djjCVvGOVqc9AEIQyvyu1i6ypKdFw8R8gQw==
 
+"@noble/curves@1.8.0":
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/@noble/curves/-/curves-1.8.0.tgz#fe035a23959e6aeadf695851b51a87465b5ba8f7"
+  integrity sha512-j84kjAbzEnQHaSIhRPUmB3/eVXu2k3dKPl2LOrR8fSOIL+89U+7lV117EWHtq/GHM3ReGHM46iRBdZfpc4HRUQ==
+  dependencies:
+    "@noble/hashes" "1.7.0"
+
 "@noble/curves@1.9.0":
   version "1.9.0"
   resolved "https://registry.yarnpkg.com/@noble/curves/-/curves-1.9.0.tgz#13e0ca8be4a0ce66c113693a94514e5599f40cfc"
@@ -956,6 +963,11 @@
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/@noble/hashes/-/hashes-1.4.0.tgz#45814aa329f30e4fe0ba49426f49dfccdd066426"
   integrity sha512-V1JJ1WTRUqHHrOSh597hURcMqVKVGL/ea3kv0gSnEdsEZ0/+VyPghM1lMNGc00z7CIQorSvbKpuJkxvuHbvdbg==
+
+"@noble/hashes@1.7.0":
+  version "1.7.0"
+  resolved "https://registry.yarnpkg.com/@noble/hashes/-/hashes-1.7.0.tgz#5d9e33af2c7d04fee35de1519b80c958b2e35e39"
+  integrity sha512-HXydb0DgzTpDPwbVeDGCG1gIu7X6+AuU6Zl6av/E/KG8LMsvPntvq+w17CHRpKBmN6Ybdrt1eP3k4cj8DJa78w==
 
 "@noble/hashes@1.8.0", "@noble/hashes@^1.2.0", "@noble/hashes@^1.7.1", "@noble/hashes@^1.8.0", "@noble/hashes@~1.8.0":
   version "1.8.0"
@@ -1179,10 +1191,10 @@
   resolved "https://registry.yarnpkg.com/@turnkey/encoding/-/encoding-0.5.0.tgz#415d721383c8267a8ca173cef34298a325a6a57d"
   integrity sha512-nRlKRQa6B5/xltGUKN1iKo4h4YC/0iFz0fAuFFZevc+YGDj7ddAP/3HkWmVvLmdoicUgs9rxvWbLRlgqPkbwzQ==
 
-"@turnkey/http@3.5.0":
-  version "3.5.0"
-  resolved "https://registry.yarnpkg.com/@turnkey/http/-/http-3.5.0.tgz#3a7ab407c776f4225f513765618c59a3df479762"
-  integrity sha512-Lb2VDBhtRQsBjXJdLKBtSri6U3tGYW2C3aBN7zNFN11eoRdbVfQTY+PvZJw2UiQr13lV72mUI6Hnuv4+NrXUUA==
+"@turnkey/http@3.6.0":
+  version "3.6.0"
+  resolved "https://registry.yarnpkg.com/@turnkey/http/-/http-3.6.0.tgz#23e714b9282d38cc93b074142161de493bd95db3"
+  integrity sha512-TpjZNpNWuJVDbnMGQva/kAuDheWDjZwS6BweeXuqQsfPf/pBeuqP0HVj6+3D2jQAQYNfQ1IE0snRURs+Uu0Inw==
   dependencies:
     "@turnkey/api-key-stamper" "0.4.7"
     "@turnkey/encoding" "0.5.0"
@@ -1202,15 +1214,15 @@
     "@turnkey/api-key-stamper" "0.4.7"
     "@turnkey/encoding" "0.5.0"
 
-"@turnkey/sdk-browser@5.3.2", "@turnkey/sdk-browser@^5.3.2":
-  version "5.3.2"
-  resolved "https://registry.yarnpkg.com/@turnkey/sdk-browser/-/sdk-browser-5.3.2.tgz#1d1ed0a421e1918bc0e83ab77bce16949d5e22e8"
-  integrity sha512-JfpFdOCtifZxPd6suHfz+/NHHLER81bozRCMsjPQUPJmQgUtBHb/bLjXIXz5JDjorDkO395ZELvN0yEqC2hLJA==
+"@turnkey/sdk-browser@5.4.1", "@turnkey/sdk-browser@^5.4.1":
+  version "5.4.1"
+  resolved "https://registry.yarnpkg.com/@turnkey/sdk-browser/-/sdk-browser-5.4.1.tgz#aa6933768e7ab6700dcc99d453ca8665723c08f7"
+  integrity sha512-sjQDITGOMEIYofdAoCQjt9qpFZkx7GFHhPATet8nzkEaE9dzOH71RB0eTtwF+agN01Swu/OGaqCqDvZoGxc/mw==
   dependencies:
     "@turnkey/api-key-stamper" "0.4.7"
     "@turnkey/crypto" "2.4.3"
     "@turnkey/encoding" "0.5.0"
-    "@turnkey/http" "3.5.0"
+    "@turnkey/http" "3.6.0"
     "@turnkey/iframe-stamper" "2.5.0"
     "@turnkey/indexed-db-stamper" "1.1.1"
     "@turnkey/sdk-types" "0.2.1"
@@ -1221,10 +1233,10 @@
     cross-fetch "^3.1.5"
     hpke-js "^1.2.7"
 
-"@turnkey/sdk-react@^5.2.6":
-  version "5.2.6"
-  resolved "https://registry.yarnpkg.com/@turnkey/sdk-react/-/sdk-react-5.2.6.tgz#adc7819ca3776b0fe0cb3135ffb6b7f258f27c56"
-  integrity sha512-FxW/4/hZH895sStV/InApENpzRGMbjHQsfC8Vm/tSjAE2r4ktUyNrHOj/+lpGtPtNk3L6AnkItos2m6DRdVrPg==
+"@turnkey/sdk-react@^5.2.11":
+  version "5.2.11"
+  resolved "https://registry.yarnpkg.com/@turnkey/sdk-react/-/sdk-react-5.2.11.tgz#60764d19c2bfc0beffda5546c10b80fc5543306d"
+  integrity sha512-t/qapElSsQ7t/kA9AVKS+fVYvDlU/muUAWNp6npJGxiIR63NjCruQVBmwDILz7f+C+pve7tGpgnA3zye0tHBgg==
   dependencies:
     "@emotion/react" "^11.13.3"
     "@emotion/styled" "^11.13.0"
@@ -1234,8 +1246,8 @@
     "@noble/hashes" "1.4.0"
     "@react-oauth/google" "^0.12.1"
     "@turnkey/crypto" "2.4.3"
-    "@turnkey/sdk-browser" "5.3.2"
-    "@turnkey/sdk-server" "4.2.2"
+    "@turnkey/sdk-browser" "5.4.1"
+    "@turnkey/sdk-server" "4.3.0"
     "@turnkey/sdk-types" "0.2.1"
     "@turnkey/wallet-stamper" "1.0.7"
     jwt-decode "^4.0.0"
@@ -1245,13 +1257,13 @@
     react-international-phone "^4.3.0"
     usehooks-ts "^3.1.1"
 
-"@turnkey/sdk-server@4.2.2", "@turnkey/sdk-server@^4.2.2":
-  version "4.2.2"
-  resolved "https://registry.yarnpkg.com/@turnkey/sdk-server/-/sdk-server-4.2.2.tgz#1f5802002ca6daaf06581988526d106904391b88"
-  integrity sha512-8v12T148dUYzDRJ+7AGbUcxY+LVUo2nDj4KONA+LEuyv/EdXLzTAUnHeFWJNvvdlHxmvfmgR/LKhGrZr3d3jmA==
+"@turnkey/sdk-server@4.3.0", "@turnkey/sdk-server@^4.3.0":
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/@turnkey/sdk-server/-/sdk-server-4.3.0.tgz#c8c3e02d23638dd91b16cedd77da3020ae607eb7"
+  integrity sha512-yZLKt+jyWiVSxmLo3/elTD/Z4B83iCqYGwR7RntJe9bvo1IuaTSHAu1ZwAFAKgmvugtXukK+T+8f37ekVZxiNg==
   dependencies:
     "@turnkey/api-key-stamper" "0.4.7"
-    "@turnkey/http" "3.5.0"
+    "@turnkey/http" "3.6.0"
     "@turnkey/wallet-stamper" "1.0.7"
     buffer "^6.0.3"
     cross-fetch "^3.1.5"
@@ -1260,6 +1272,18 @@
   version "0.2.1"
   resolved "https://registry.yarnpkg.com/@turnkey/sdk-types/-/sdk-types-0.2.1.tgz#db9257b7b3b95c87f89a2b8fccae95d85986c908"
   integrity sha512-nVuhcpaWbBUPd75kZ8OjCYRKfg6zN3dCNqzu1J3VR/O4QxqPaKWKYHqEL1cSCEvvKTlKB8DE6jwmPkOWd4m6kQ==
+
+"@turnkey/viem@^0.10.5":
+  version "0.10.5"
+  resolved "https://registry.yarnpkg.com/@turnkey/viem/-/viem-0.10.5.tgz#d8784709879593c1257871cb4b47f57610b41d50"
+  integrity sha512-Vfbb+lPuarXpUGH83UGYt7vnAztLIVf1HEVE/6YsMOO8RD8wP4n8bfcUOvwcQZ900XXraiwy6EhiDUhEBVfufA==
+  dependencies:
+    "@noble/curves" "1.8.0"
+    "@turnkey/api-key-stamper" "0.4.7"
+    "@turnkey/http" "3.6.0"
+    "@turnkey/sdk-browser" "5.4.1"
+    "@turnkey/sdk-server" "4.3.0"
+    cross-fetch "^4.0.0"
 
 "@turnkey/wallet-stamper@1.0.7":
   version "1.0.7"
@@ -1548,6 +1572,13 @@
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@yarnpkg/lockfile/-/lockfile-1.1.0.tgz#e77a97fbd345b76d83245edcd17d393b1b41fb31"
   integrity sha512-GpSwvyXOcOOlV70vbnzjj4fW5xW/FdUF6nQEt1ENy7m4ZCczi1+/buVUPAqmGfqznsORNFzUMjctTIp8a9tuCQ==
+
+"@zerodev/sdk@^5.0.0":
+  version "5.4.41"
+  resolved "https://registry.yarnpkg.com/@zerodev/sdk/-/sdk-5.4.41.tgz#5aa4d48806756f31b1127690468cfd2041679020"
+  integrity sha512-YNXLYq4PXdC8u6NVzKNDnN42MKnXignehs0eAgyTb1Er57C4ueClR3ShR64QQ0oCL20NRtzMt/dJ+Yi+sVXndA==
+  dependencies:
+    semver "^7.6.0"
 
 abitype@1.0.8, abitype@^1.0.8:
   version "1.0.8"
@@ -1912,6 +1943,13 @@ cross-fetch@^3.1.5:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/cross-fetch/-/cross-fetch-3.2.0.tgz#34e9192f53bc757d6614304d9e5e6fb4edb782e3"
   integrity sha512-Q+xVJLoGOeIMXZmbUK4HYk+69cQH6LudR0Vu/pRm2YlU/hDV9CiS0gKUMaWY5f2NeUH9C1nV3bsTlCo0FsTV1Q==
+  dependencies:
+    node-fetch "^2.7.0"
+
+cross-fetch@^4.0.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/cross-fetch/-/cross-fetch-4.1.0.tgz#8f69355007ee182e47fa692ecbaa37a52e43c3d2"
+  integrity sha512-uKm5PU+MHTootlWEY+mZ4vvXoCn4fLQxT9dSc1sXVMSFkINTJVN8cAQROpwcKm8bJ/c7rgZVIBWzH5T78sNZZw==
   dependencies:
     node-fetch "^2.7.0"
 

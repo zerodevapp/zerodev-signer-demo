@@ -63,7 +63,7 @@ export function TransactionDialog({
               Max Fee Per Gas
             </label>
             <p className="text-sm text-gray-900">
-              {formatGwei(transaction.maxFeePerGas)} Gwei
+              {transaction.maxFeePerGas ? formatGwei(transaction.maxFeePerGas) : 'N/A'} Gwei
             </p>
           </div>
 
@@ -72,7 +72,7 @@ export function TransactionDialog({
               Max Priority Fee
             </label>
             <p className="text-sm text-gray-900">
-              {formatGwei(transaction.maxPriorityFeePerGas)} Gwei
+              {transaction.maxPriorityFeePerGas ? formatGwei(transaction.maxPriorityFeePerGas) : 'N/A'} Gwei
             </p>
           </div>
 

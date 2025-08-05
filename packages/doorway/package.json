@@ -12,9 +12,11 @@
     "postinstall": "patch-package"
   },
   "dependencies": {
-    "@turnkey/sdk-browser": "^5.3.2",
-    "@turnkey/sdk-react": "^5.2.6",
-    "@turnkey/sdk-server": "^4.2.2",
+    "@turnkey/sdk-browser": "^5.4.1",
+    "@turnkey/sdk-react": "^5.2.11",
+    "@turnkey/sdk-server": "^4.3.0",
+    "@turnkey/viem": "^0.10.5",
+    "@zerodev/sdk": "^5.0.0",
     "drizzle-kit": "^0.31.4",
     "drizzle-orm": "^0.44.2",
     "next": "15.3.4",

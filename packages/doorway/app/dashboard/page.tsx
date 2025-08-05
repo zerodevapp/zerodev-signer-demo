@@ -20,6 +20,7 @@ import { sepolia } from 'viem/chains';
 
 import { useAuthMiddleware } from '../hooks/useAuthMiddleware';
 import { useTransactionDialog } from '../contexts/TransactionDialogContext';
+import { sendGaslessTransaction } from '../services/gaslessTransaction';
 
 type AddPasskeyFormData = {
   authenticatorName: string;
@@ -76,6 +77,7 @@ export default function Dashboard() {
   const { openDialog } = useTransactionDialog();
 
   const [status, setStatus] = useState<Status>('idle');
+  const [isGasless, setIsGasless] = useState(false);
   const [session, setSession] = useState<
     TurnkeySession | undefined | 'loading'
   >('loading');
@@ -201,34 +203,71 @@ export default function Dashboard() {
   }
 
   async function sendTransaction({ to, data, value }: SendTransactionFormData) {
-    const transaction: TransactionSerializable = {
-      chainId: 11155111,
-      maxFeePerGas: parseGwei('0.1'),
-      maxPriorityFeePerGas: parseGwei('0.1'),
-      to: to as Address,
-      data: (data as Hex) || '0x',
-      value: parseEther(value),
-      nonce: await sepoliaClient.getTransactionCount({ address }),
-    };
-    transaction.gas = await sepoliaClient.estimateGas(transaction);
+    try {
+      if (!address || !client) {
+        throw new Error('No address or client');
+      }
+      if (isGasless) {
+        // Use gasless transaction via EIP-7702
+        const transaction: TransactionSerializable = {
+          to: to as Address,
+          data: (data as Hex) || '0x',
+          value: parseEther(value),
+        };
 
-    if (!(await openDialog(transaction))) {
-      return;
+        if (!(await openDialog(transaction))) {
+          return;
+        }
+        
+        if (!whoami) {
+          throw new Error('No whoami');
+        }
+
+        const result = await sendGaslessTransaction({
+          turnkeyClient: client,
+          organizationId: whoami.organizationId,
+          fromAddress: address,
+          to: to as Address,
+          data: (data as Hex) || '0x',
+          value: parseEther(value),
+        });
+
+        window.open(`https://sepolia.etherscan.io/tx/${result.transactionHash}`, '_blank');
+      } else {
+        // Regular transaction flow
+        const transaction: TransactionSerializable = {
+          chainId: 11155111,
+          maxFeePerGas: parseGwei('0.1'),
+          maxPriorityFeePerGas: parseGwei('0.1'),
+          to: to as Address,
+          data: (data as Hex) || '0x',
+          value: parseEther(value),
+          nonce: await sepoliaClient.getTransactionCount({ address }),
+        };
+        transaction.gas = await sepoliaClient.estimateGas(transaction);
+
+        if (!(await openDialog(transaction))) {
+          return;
+        }
+
+        const unsignedTransaction = serializeTransaction(transaction);
+
+        const { signedTransaction } = await client.signTransaction({
+          type: 'TRANSACTION_TYPE_ETHEREUM',
+          unsignedTransaction,
+          signWith: address,
+        });
+
+        const hash = await sepoliaClient.sendRawTransaction({
+          serializedTransaction: `0x${signedTransaction}`,
+        });
+
+        window.open(`https://sepolia.etherscan.io/tx/${hash}`, '_blank');
+      }
+    } catch (error) {
+      console.error('Transaction error:', error);
+      alert(`Transaction failed: ${error.message}`);
     }
-
-    const unsignedTransaction = serializeTransaction(transaction);
-
-    const { signedTransaction } = await client.signTransaction({
-      type: 'TRANSACTION_TYPE_ETHEREUM',
-      unsignedTransaction,
-      signWith: address,
-    });
-
-    const hash = await sepoliaClient.sendRawTransaction({
-      serializedTransaction: `0x${signedTransaction}`,
-    });
-
-    window.open(`https://sepolia.etherscan.io/tx/${hash}`, '_blank');
   }
 
   if (isLoading || session === 'loading') {
@@ -320,6 +359,19 @@ export default function Dashboard() {
 
       <div className="flex flex-col items-start">
         <h3 className="text-lg font-bold">Send Transaction</h3>
+        
+        <div className="flex items-center gap-2 mb-4">
+          <input
+            type="checkbox"
+            id="gasless"
+            checked={isGasless}
+            onChange={(e) => setIsGasless(e.target.checked)}
+            className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+          />
+          <label htmlFor="gasless" className="text-sm font-medium text-gray-700">
+            Send gasless transaction via EIP-7702
+          </label>
+        </div>
 
         <form
           className="flex flex-col w-full gap-2"
