@@ -16,6 +16,7 @@ For gasless transactions (EIP-7702), you'll also need a [ZeroDev](https://dashbo
 
 ```bash
 yarn install
+npx patch-packages
 ```
 
 ## Database Setup
@@ -48,8 +49,6 @@ cp .env.example .env
 ```
 # Turnkey credentials (required)
 NEXT_PUBLIC_TURNKEY_ORGANIZATION_ID=your_org_id
-TURNKEY_API_PRIVATE_KEY=your_private_key
-TURNKEY_API_PUBLIC_KEY=your_public_key
 
 # ZeroDev RPC URL (required for gasless transactions)
 NEXT_PUBLIC_ZERODEV_RPC_URL=your_zerodev_rpc_url

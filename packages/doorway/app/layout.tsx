@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { TurnkeyProvider } from '@turnkey/sdk-react';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 import './globals.css';
-import { TransactionDialogProvider } from './contexts/TransactionDialogContext';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -30,20 +30,20 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <TurnkeyProvider
-          config={{
-            rpId: 'localhost',
-            apiBaseUrl: 'https://api.turnkey.com',
-            defaultOrganizationId:
-              process.env.NEXT_PUBLIC_TURNKEY_ORGANIZATION_ID!,
-          }}
-        >
-          <TransactionDialogProvider>
-            <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
-              {children}
-            </div>
-          </TransactionDialogProvider>
-        </TurnkeyProvider>
+        <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}>
+          <TurnkeyProvider
+            config={{
+              rpId: 'localhost',
+              apiBaseUrl: 'https://api.turnkey.com',
+              defaultOrganizationId:
+                process.env.NEXT_PUBLIC_TURNKEY_ORGANIZATION_ID!,
+            }}
+          >
+              <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
+                {children}
+              </div>
+          </TurnkeyProvider>
+        </GoogleOAuthProvider>
       </body>
     </html>
   );

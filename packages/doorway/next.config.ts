@@ -8,11 +8,6 @@ const nextConfig: NextConfig = {
         destination: '/dashboard',
         permanent: false,
       },
-      {
-        source: '/auth',
-        destination: '/auth/login',
-        permanent: false,
-      },
     ];
   },
 };
