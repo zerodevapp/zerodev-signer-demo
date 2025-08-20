@@ -29,14 +29,14 @@ export function AppManagementTest() {
     appName: string;
   } | null>(null);
   
-  // Form for manual app input
+  
   const [manualApp, setManualApp] = useState({
     appId: '',
     apiKey: '',
   });
   const [showManualInput, setShowManualInput] = useState(false);
   
-  // Load apps on mount
+  
   useEffect(() => {
     loadApps();
   }, []);
@@ -82,17 +82,17 @@ export function AppManagementTest() {
         throw new Error(data.error || 'Failed to create app');
       }
 
-      // Store the created app with API key
+      
       setCreatedApp({
         appId: data.appId,
         apiKey: data.apiKey,
         appName: data.appName,
       });
 
-      // Clear form
+      
       setFormData({ appName: '', appDescription: '' });
 
-      // Reload apps list
+      
       await loadApps();
 
     } catch (err) {
@@ -103,15 +103,18 @@ export function AppManagementTest() {
   };
 
   const handleSelectApp = (appId: string, apiKey?: string) => {
-    // Store selected app in localStorage for use by auth components
+    
     localStorage.setItem('v2_current_app_id', appId);
     if (apiKey) {
       localStorage.setItem('v2_current_api_key', apiKey);
     }
     
-    // Show confirmation
+    
     const app = apps.find(a => a.appId === appId);
-    alert(`Selected app: ${app?.appName || 'Manual Entry'} (${appId})`);
+    alert(`Selected app: ${app?.appName || 'Manual Entry'} (${appId})\n\nRedirecting to dashboard...`);
+    setTimeout(() => {
+      window.location.href = '/dashboard';
+    }, 1000);
   };
 
   const handleManualAppSelect = () => {
@@ -120,7 +123,7 @@ export function AppManagementTest() {
       return;
     }
 
-    // Store manual app details
+    
     localStorage.setItem('v2_current_app_id', manualApp.appId.trim());
     if (manualApp.apiKey.trim()) {
       localStorage.setItem('v2_current_api_key', manualApp.apiKey.trim());
@@ -128,12 +131,11 @@ export function AppManagementTest() {
       localStorage.removeItem('v2_current_api_key');
     }
 
-    // Clear form and hide input
-    setManualApp({ appId: '', apiKey: '' });
-    setShowManualInput(false);
-    setError('');
-
-    alert(`Selected manual app: ${manualApp.appId.trim()}`);
+    
+    alert(`Selected manual app: ${manualApp.appId.trim()}\n\nRedirecting to dashboard...`);
+    setTimeout(() => {
+      window.location.href = '/dashboard';
+    }, 1000);
   };
 
   const getCurrentAppId = () => {

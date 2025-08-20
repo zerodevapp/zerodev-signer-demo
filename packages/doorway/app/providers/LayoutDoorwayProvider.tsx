@@ -1,0 +1,45 @@
+"use client";
+
+import { useEffect, useState, ReactNode } from 'react';
+import { DoorwayProvider } from './DoorwayProvider';
+
+interface LayoutDoorwayProviderProps {
+  children: ReactNode;
+}
+
+export function LayoutDoorwayProvider({ children }: LayoutDoorwayProviderProps) {
+  const [config, setConfig] = useState<{
+    apiKey: string;
+    appId: string;
+    iframeElementId: string;
+    iframeUrl: string;
+  } | null>(null);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const apiKey = localStorage.getItem("v2_current_api_key");
+    const appId = localStorage.getItem("v2_current_app_id");
+
+    if (apiKey && appId) {
+      setConfig({
+        apiKey,
+        appId,
+        iframeElementId: "turnkey-auth-iframe-element-id",
+        iframeUrl: "https://auth.turnkey.com"
+      });
+    }
+  }, []);
+
+  // If we have config, wrap with DoorwayProvider
+  if (config) {
+    return (
+      <DoorwayProvider config={config}>
+        {children}
+      </DoorwayProvider>
+    );
+  }
+
+  // Otherwise just render children (setup page will work)
+  return <>{children}</>;
+}

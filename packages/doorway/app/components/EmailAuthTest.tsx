@@ -1,106 +1,120 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useTargetPublicKey } from '../hooks/useTargetPublicKey';
-
+import { useState } from "react";
+import { useDoorwayProvider } from "../hooks/useDoorwayProvider";
 
 export function EmailAuthTest() {
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<any>(null);
-  const [error, setError] = useState<string>('');
-  
-  const { 
-    targetPublicKey, 
-    nonce, 
-    isGenerating, 
-    generateNewKey, 
-    error: keyError 
-  } = useTargetPublicKey();
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState<string>("");
 
-  // Generate initial key on mount
-  // useEffect(() => {
-  //   generateNewKey();
-  // }, [generateNewKey]);
+  const { isLoading, error: sdkError, isReady, auth } = useDoorwayProvider();
 
   const handleEmailAuth = async () => {
-    if (!email || !targetPublicKey) {
-      setError('Please fill in all fields and generate a target public key');
-      return;
-    }
-
-    const appId = localStorage.getItem('v2_current_app_id');
-    if (!appId) {
-      setError('Please select an app first from the App Management tab');
-      return;
-    }
-
-    if (keyError) {
-      setError(`Key generation error: ${keyError}`);
+    if (!isReady) {
+      setError(
+        "Doorway SDK not ready. Please ensure you have selected an app first."
+      );
       return;
     }
 
     setLoading(true);
-    setError('');
+    setError("");
     setResult(null);
 
     try {
-      const apiKey = localStorage.getItem('v2_current_api_key');
-      const headers: HeadersInit = {
-        'Content-Type': 'application/json',
-      };
-      
-      // Include API key if available
-      if (apiKey) {
-        headers['X-API-Key'] = apiKey;
-      }
+      const data = await auth({ type: "email", email });
 
-      const response = await fetch('http://localhost:3001/api/v1/auth/email-magic', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          email,
-          targetPublicKey,
-          appId,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Authentication failed');
-      }
+      console.log("data", data);
 
       setResult(data);
-
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error occurred');
+      setError(err instanceof Error ? err.message : "Unknown error occurred");
     } finally {
       setLoading(false);
     }
   };
 
-  const currentAppId = typeof window !== 'undefined' ? localStorage.getItem('v2_current_app_id') : null;
-
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Email Authentication Test</h2>
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">
+          Email Authentication Test
+        </h2>
         <p className="text-gray-600 mb-6">
-          Test the email-based authentication flow. This will create a user in Turnkey if they don&apos;t exist, 
-          and send a magic link for authentication.
+          Test the email-based authentication flow. This will create a user in
+          Turnkey if they don&apos;t exist, and send a magic link for
+          authentication.
         </p>
       </div>
 
-      {/* App Context Display */}
-      {currentAppId && (
+      {/* SDK Status Display */}
+      {isLoading && (
         <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
           <div className="flex items-center text-sm">
-            <svg className="h-4 w-4 text-blue-400 mr-2" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500 mr-2"></div>
+            <span className="text-blue-700">Initializing Doorway SDK...</span>
+          </div>
+        </div>
+      )}
+
+      {sdkError && (
+        <div className="bg-red-50 border border-red-200 rounded-md p-3">
+          <div className="flex items-center text-sm">
+            <svg
+              className="h-4 w-4 text-red-400 mr-2"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                clipRule="evenodd"
+              />
             </svg>
-            <span className="text-blue-700">
-              Using app: <span className="font-mono font-medium">{currentAppId}</span>
+            <span className="text-red-700">SDK Error: {sdkError}</span>
+          </div>
+        </div>
+      )}
+
+      {isReady && (
+        <div className="bg-green-50 border border-green-200 rounded-md p-3">
+          <div className="flex items-center text-sm">
+            <svg
+              className="h-4 w-4 text-green-400 mr-2"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <span className="text-green-700">
+              Doorway SDK ready for authentication
+            </span>
+          </div>
+        </div>
+      )}
+
+      {!isLoading && !isReady && !sdkError && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3">
+          <div className="flex items-center text-sm">
+            <svg
+              className="h-4 w-4 text-yellow-400 mr-2"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <span className="text-yellow-700">
+              Please select an app from the App Management tab first
             </span>
           </div>
         </div>
@@ -109,7 +123,10 @@ export function EmailAuthTest() {
       <div className="grid grid-cols-1 gap-6">
         {/* Email Input */}
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+          <label
+            htmlFor="email"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
             Email Address
           </label>
           <input
@@ -122,66 +139,17 @@ export function EmailAuthTest() {
           />
         </div>
 
-        {/* Target Public Key Generation */}
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <label className="block text-sm font-medium text-gray-700">
-              Target Public Key (Generated by Turnkey)
-            </label>
-            <button
-              type="button"
-              onClick={generateNewKey}
-              disabled={isGenerating}
-              className="text-sm bg-gray-100 text-gray-700 px-3 py-1 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isGenerating ? 'Generating...' : '🔄 Generate New Key'}
-            </button>
-          </div>
-          
-          {targetPublicKey ? (
-            <div className="space-y-3">
-              <div>
-                <div className="font-mono text-xs text-gray-600 bg-gray-50 p-3 rounded border break-all">
-                  {targetPublicKey}
-                </div>
-              </div>
-              {nonce && (
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
-                    Nonce (SHA256 of public key)
-                  </label>
-                  <div className="font-mono text-xs text-gray-600 bg-gray-50 p-2 rounded border break-all">
-                    {nonce}
-                  </div>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3">
-              <p className="text-sm text-yellow-800">
-                {isGenerating ? 'Generating new target public key...' : 'Click "Generate New Key" to create a target public key'}
-              </p>
-            </div>
-          )}
-          
-          {keyError && (
-            <div className="bg-red-50 border border-red-200 rounded-md p-3 mt-2">
-              <p className="text-sm text-red-800">{keyError}</p>
-            </div>
-          )}
-          
-          <p className="text-sm text-gray-500 mt-2">
-            This public key is generated using Turnkey&apos;s client-side SDK and will be used to authenticate your session.
-          </p>
-        </div>
-
         {/* Submit Button */}
         <button
           onClick={handleEmailAuth}
-          disabled={loading || isGenerating || !targetPublicKey}
+          disabled={loading || !isReady || !email.trim()}
           className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {loading ? 'Authenticating...' : isGenerating ? 'Generating Key...' : !targetPublicKey ? 'Generate Key First' : 'Send Magic Link'}
+          {loading
+            ? "Authenticating..."
+            : !isReady
+            ? "SDK Not Ready"
+            : "Send Magic Link"}
         </button>
       </div>
 
@@ -190,15 +158,21 @@ export function EmailAuthTest() {
         <div className="bg-red-50 border border-red-200 rounded-md p-4">
           <div className="flex">
             <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              <svg
+                className="h-5 w-5 text-red-400"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                  clipRule="evenodd"
+                />
               </svg>
             </div>
             <div className="ml-3">
               <h3 className="text-sm font-medium text-red-800">Error</h3>
-              <div className="mt-2 text-sm text-red-700">
-                {error}
-              </div>
+              <div className="mt-2 text-sm text-red-700">{error}</div>
             </div>
           </div>
         </div>
@@ -209,12 +183,22 @@ export function EmailAuthTest() {
         <div className="bg-green-50 border border-green-200 rounded-md p-4">
           <div className="flex">
             <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              <svg
+                className="h-5 w-5 text-green-400"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                  clipRule="evenodd"
+                />
               </svg>
             </div>
             <div className="ml-3">
-              <h3 className="text-sm font-medium text-green-800">Authentication Response</h3>
+              <h3 className="text-sm font-medium text-green-800">
+                Authentication Response
+              </h3>
               <div className="mt-2">
                 <pre className="text-sm text-green-700 whitespace-pre-wrap">
                   {JSON.stringify(result, null, 2)}
@@ -229,8 +213,16 @@ export function EmailAuthTest() {
       <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
         <div className="flex">
           <div className="flex-shrink-0">
-            <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenovenRule" />
+            <svg
+              className="h-5 w-5 text-blue-400"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                clipRule="evenovenRule"
+              />
             </svg>
           </div>
           <div className="ml-3">
@@ -238,9 +230,17 @@ export function EmailAuthTest() {
             <div className="mt-2 text-sm text-blue-700">
               <ol className="list-decimal list-inside space-y-1">
                 <li>Enter an email address and target public key</li>
-                <li>Click "Send Magic Link&quot; to initiate authentication</li>
-                <li>If successful, you&apos;ll see a response indicating a magic link was sent</li>
-                <li>For email auth, you&apos;ll need to complete the flow via the magic link to get a session token</li>
+                <li>
+                  Click &quot;Send Magic Link&quot; to initiate authentication
+                </li>
+                <li>
+                  If successful, you&apos;ll see a response indicating a magic
+                  link was sent
+                </li>
+                <li>
+                  For email auth, you&apos;ll need to complete the flow via the
+                  magic link to get a session token
+                </li>
               </ol>
             </div>
           </div>
