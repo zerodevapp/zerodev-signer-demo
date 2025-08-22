@@ -15,6 +15,8 @@ interface CreateAppFormData {
   appDescription: string;
 }
 
+const kmsServerUrl = process.env.NEXT_PUBLIC_KMS_SERVER_URL
+
 export function AppManagementTest() {
   const [apps, setApps] = useState<App[]>([]);
   const [loading, setLoading] = useState(false);
@@ -43,7 +45,7 @@ export function AppManagementTest() {
 
   const loadApps = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/v1/apps');
+      const response = await fetch(`${kmsServerUrl}/api/v1/apps`);
       const data = await response.json();
       
       if (data.success) {
@@ -65,7 +67,7 @@ export function AppManagementTest() {
     setCreatedApp(null);
 
     try {
-      const response = await fetch('http://localhost:3001/api/v1/apps', {
+      const response = await fetch(`${kmsServerUrl}/api/v1/apps`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
