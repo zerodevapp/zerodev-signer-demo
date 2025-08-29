@@ -2,18 +2,16 @@
 
 import { useEffect, useState, ReactNode } from 'react';
 import { DoorwayProvider } from './DoorwayProvider';
+import { DoorwayConfig } from '@doorway/core';
 
 interface LayoutDoorwayProviderProps {
   children: ReactNode;
 }
 
+const organizationId = process.env.NEXT_PUBLIC_TURNKEY_ORGANIZATION_ID
+
 export function LayoutDoorwayProvider({ children }: LayoutDoorwayProviderProps) {
-  const [config, setConfig] = useState<{
-    apiKey: string;
-    appId: string;
-    iframeElementId: string;
-    iframeUrl: string;
-  } | null>(null);
+  const [config, setConfig] = useState<DoorwayConfig | null>(null);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -26,7 +24,8 @@ export function LayoutDoorwayProvider({ children }: LayoutDoorwayProviderProps) 
         apiKey,
         appId,
         iframeElementId: "turnkey-auth-iframe-element-id",
-        iframeUrl: "https://auth.turnkey.com"
+        iframeUrl: "https://auth.turnkey.com",
+        organizationId
       });
     }
   }, []);
