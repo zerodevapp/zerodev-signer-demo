@@ -24,7 +24,13 @@ export function EmailAuthTest() {
     setResult(null);
 
     try {
-      const data = await auth({ type: "email", email });
+      const data = await auth({ 
+        type: "email",
+        email,
+        emailCustomization: {
+          magicLinkTemplate: process.env.NEXT_PUBLIC_APP_URL + '/verify?bundle=%s'
+        },
+      });
 
       console.log("data", data);
 

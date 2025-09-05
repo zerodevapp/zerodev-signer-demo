@@ -5,15 +5,15 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  '@doorway/core': link:../../../Library/pnpm/global/5/node_modules/@doorway/core
+  '@doorway/core': link:../doorway-kms-sdk/packages/core
 
 importers:
 
   .:
     dependencies:
       '@doorway/core':
-        specifier: link:../../../Library/pnpm/global/5/node_modules/@doorway/core
-        version: link:../../../Library/pnpm/global/5/node_modules/@doorway/core
+        specifier: link:../doorway-kms-sdk/packages/core
+        version: link:../doorway-kms-sdk/packages/core
 
   packages/demo:
     dependencies:
