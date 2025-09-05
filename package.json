@@ -5,7 +5,6 @@
     "packages/*"
   ],
   "dependencies": {
-    "@doorway/core": "link:../../../Library/pnpm/global/5/node_modules/@doorway/core",
-    "core": "link:../../../doorway-kms-sdk/packages/core"
+    "@doorway/core": "link:../../../Library/pnpm/global/5/node_modules/@doorway/core"
   }
 }
