@@ -25,7 +25,8 @@ export function LayoutDoorwayProvider({ children }: LayoutDoorwayProviderProps) 
         appId,
         iframeElementId: "turnkey-auth-iframe-element-id",
         iframeUrl: "https://auth.turnkey.com",
-        organizationId
+        organizationId,
+        proxyBaseUrl: process.env.NEXT_PUBLIC_TURNKEY_PROXY_BASE_URL || "http://localhost:3001",
       });
     }
   }, []);
