@@ -2,12 +2,36 @@
 
 import { useState } from "react";
 import { useDoorwayProvider } from "../hooks/useDoorwayProvider";
-import { Hex } from "viem";
+import {
+  Hex,
+  verifyMessage,
+  recoverAddress,
+  recoverMessageAddress,
+  recoverTypedDataAddress,
+  parseSignature,
+  serializeSignature,
+  http,
+  createWalletClient,
+  verifyTypedData,
+} from "viem";
+import { sepolia } from "viem/chains";
+import { createPublicClient } from "viem";
+
+type SigningMode = "message" | "typedData";
+
+type VerificationResult = {
+  recoveredAddress: Hex;
+  expectedAddress: Hex;
+  isValid: boolean;
+};
 
 export function SigningTest() {
+  const [mode, setMode] = useState<SigningMode>("message");
   const [payload, setPayload] = useState("Hello World");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<Hex | null>(null);
+  const [verificationResult, setVerificationResult] =
+    useState<VerificationResult | null>(null);
   const [error, setError] = useState<string>("");
   const {
     isLoading,
@@ -27,12 +51,64 @@ export function SigningTest() {
     setLoading(true);
     setError("");
     setResult(null);
+    setVerificationResult(null);
 
     try {
       const viemAccount = await toAccount();
-      const data = await viemAccount.signMessage({ message: payload });
+      const expectedAddress = viemAccount.address;
+      let signature: Hex;
 
-      setResult(data);
+      if (mode === "message") {
+        signature = await viemAccount.signMessage({ message: payload });
+
+        // Verify and recover address for message
+        const recoveredAddress = await recoverMessageAddress({
+          message: payload,
+          signature,
+        });
+
+        const isValid = await verifyMessage({
+          address: expectedAddress,
+          message: payload,
+          signature,
+        });
+
+        setVerificationResult({
+          recoveredAddress,
+          expectedAddress,
+          isValid,
+        });
+      } else {
+        // Parse the typed data JSON
+        const typedData = JSON.parse(payload);
+        console.log("typedData", typedData);
+        const walletClient = createWalletClient({
+          transport: http(process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL),
+          chain: sepolia,
+          account: viemAccount,
+        });
+        signature = await walletClient.signTypedData(typedData);
+        signature = serializeSignature(parseSignature(signature));
+        const isValid = await verifyTypedData({
+          ...typedData,
+          signature,
+          address: expectedAddress,
+        });
+
+        // Verify and recover address for typed data
+        const recoveredAddress = await recoverTypedDataAddress({
+          ...typedData,
+          signature,
+        });
+
+        setVerificationResult({
+          recoveredAddress,
+          expectedAddress,
+          isValid,
+        });
+      }
+
+      setResult(signature);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error occurred");
     } finally {
@@ -41,7 +117,58 @@ export function SigningTest() {
   };
 
   const loadSamplePayload = () => {
-    setPayload("Hello World");
+    if (mode === "message") {
+      setPayload("Hello World");
+    } else {
+      // Test typed data signing (EIP-712)
+      // All properties on a domain are optional
+      const domain = {
+        name: "Ether Mail",
+        version: "1",
+        chainId: 1,
+        verifyingContract: "0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC",
+      } as const;
+
+      // The named list of all type definitions
+      const types = {
+        Person: [
+          { name: "name", type: "string" },
+          { name: "wallet", type: "address" },
+        ],
+        Mail: [
+          { name: "from", type: "Person" },
+          { name: "to", type: "Person" },
+          { name: "contents", type: "string" },
+        ],
+      } as const;
+
+      const typedData = {
+        domain,
+        types,
+        primaryType: "Mail",
+        message: {
+          from: {
+            name: "Cow",
+            wallet: "0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826",
+          },
+          to: {
+            name: "Bob",
+            wallet: "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB",
+          },
+          contents: "Hello, Bob!",
+        },
+      } as const;
+
+      setPayload(JSON.stringify(typedData, null, 2));
+    }
+  };
+
+  const handleModeChange = (newMode: SigningMode) => {
+    setMode(newMode);
+    setPayload("");
+    setResult(null);
+    setVerificationResult(null);
+    setError("");
   };
 
   return (
@@ -51,10 +178,35 @@ export function SigningTest() {
           Payload Signing Test
         </h2>
         <p className="text-gray-600 mb-6">
-          Test raw payload signing with different encoding formats. The payload
-          will be signed using the wallet associated with your authenticated
-          session.
+          Test message and typed data signing with automatic verification. The
+          payload will be signed using the wallet associated with your
+          authenticated session, and the signature will be verified by
+          recovering the address to ensure it matches your wallet address.
         </p>
+
+        {/* Mode Selector */}
+        <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg mb-6">
+          <button
+            onClick={() => handleModeChange("message")}
+            className={`flex-1 py-2 px-3 text-sm font-medium rounded-md transition-colors ${
+              mode === "message"
+                ? "bg-white text-blue-700 shadow-sm"
+                : "text-gray-600 hover:text-gray-900"
+            }`}
+          >
+            Sign Message
+          </button>
+          <button
+            onClick={() => handleModeChange("typedData")}
+            className={`flex-1 py-2 px-3 text-sm font-medium rounded-md transition-colors ${
+              mode === "typedData"
+                ? "bg-white text-blue-700 shadow-sm"
+                : "text-gray-600 hover:text-gray-900"
+            }`}
+          >
+            Sign Typed Data (EIP-712)
+          </button>
+        </div>
       </div>
 
       {/* SDK Status Display */}
@@ -137,7 +289,9 @@ export function SigningTest() {
               htmlFor="payload"
               className="block text-sm font-medium text-gray-700"
             >
-              Payload to Sign
+              {mode === "message"
+                ? "Message to Sign"
+                : "Typed Data (EIP-712) JSON"}
             </label>
             <button
               type="button"
@@ -151,10 +305,20 @@ export function SigningTest() {
             id="payload"
             value={payload}
             onChange={(e) => setPayload(e.target.value)}
-            rows={4}
+            rows={mode === "message" ? 4 : 12}
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm"
-            placeholder={`Enter data...`}
+            placeholder={
+              mode === "message"
+                ? "Enter message to sign..."
+                : "Enter EIP-712 typed data JSON..."
+            }
           />
+          {mode === "typedData" && (
+            <p className="mt-1 text-xs text-gray-500">
+              Enter valid EIP-712 typed data JSON with domain, types,
+              primaryType, and message fields.
+            </p>
+          )}
         </div>
 
         {/* Sign Button */}
@@ -170,8 +334,10 @@ export function SigningTest() {
             </div>
           ) : !isReady ? (
             "SDK Not Ready"
+          ) : mode === "message" ? (
+            "✍️ Sign Message"
           ) : (
-            "✍️ Sign Payload"
+            "✍️ Sign Typed Data"
           )}
         </button>
       </div>
@@ -222,15 +388,157 @@ export function SigningTest() {
             </div>
             <div className="ml-3">
               <h3 className="text-sm font-medium text-green-800">
-                Signature Generated
+                {mode === "message"
+                  ? "Message Signature Generated"
+                  : "Typed Data Signature Generated"}
               </h3>
               <div className="mt-3 space-y-3">
                 <div>
                   <label className="block text-xs font-medium text-green-700 mb-1">
-                    SIGNATURE
+                    {mode === "message"
+                      ? "MESSAGE SIGNATURE"
+                      : "EIP-712 SIGNATURE"}
                   </label>
                   <div className="font-mono text-xs text-green-600 bg-white p-2 rounded border break-all">
                     {result}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Verification Results Display */}
+      {verificationResult && (
+        <div
+          className={`border rounded-md p-4 ${
+            verificationResult.isValid
+              ? "bg-blue-50 border-blue-200"
+              : "bg-red-50 border-red-200"
+          }`}
+        >
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg
+                className={`h-5 w-5 ${
+                  verificationResult.isValid ? "text-blue-400" : "text-red-400"
+                }`}
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                {verificationResult.isValid ? (
+                  <path
+                    fillRule="evenodd"
+                    d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                    clipRule="evenodd"
+                  />
+                ) : (
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                    clipRule="evenodd"
+                  />
+                )}
+              </svg>
+            </div>
+            <div className="ml-3">
+              <h3
+                className={`text-sm font-medium ${
+                  verificationResult.isValid ? "text-blue-800" : "text-red-800"
+                }`}
+              >
+                Signature Verification & Address Recovery
+              </h3>
+              <div className="mt-3 space-y-3">
+                <div>
+                  <label
+                    className={`block text-xs font-medium mb-1 ${
+                      verificationResult.isValid
+                        ? "text-blue-700"
+                        : "text-red-700"
+                    }`}
+                  >
+                    EXPECTED ADDRESS (Your Wallet)
+                  </label>
+                  <div
+                    className={`font-mono text-xs p-2 rounded border break-all ${
+                      verificationResult.isValid
+                        ? "text-blue-600 bg-white"
+                        : "text-red-600 bg-white"
+                    }`}
+                  >
+                    {verificationResult.expectedAddress}
+                  </div>
+                </div>
+                <div>
+                  <label
+                    className={`block text-xs font-medium mb-1 ${
+                      verificationResult.isValid
+                        ? "text-blue-700"
+                        : "text-red-700"
+                    }`}
+                  >
+                    RECOVERED ADDRESS (From Signature)
+                  </label>
+                  <div
+                    className={`font-mono text-xs p-2 rounded border break-all ${
+                      verificationResult.isValid
+                        ? "text-blue-600 bg-white"
+                        : "text-red-600 bg-white"
+                    }`}
+                  >
+                    {verificationResult.recoveredAddress}
+                  </div>
+                </div>
+                <div>
+                  <label
+                    className={`block text-xs font-medium mb-1 ${
+                      verificationResult.isValid
+                        ? "text-blue-700"
+                        : "text-red-700"
+                    }`}
+                  >
+                    VERIFICATION STATUS
+                  </label>
+                  <div
+                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      verificationResult.isValid
+                        ? "bg-green-100 text-green-800"
+                        : "bg-red-100 text-red-800"
+                    }`}
+                  >
+                    {verificationResult.isValid ? (
+                      <>
+                        <svg
+                          className="w-3 h-3 mr-1"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                        VALID - Addresses Match
+                      </>
+                    ) : (
+                      <>
+                        <svg
+                          className="w-3 h-3 mr-1"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                        INVALID - Addresses Don't Match
+                      </>
+                    )}
                   </div>
                 </div>
               </div>

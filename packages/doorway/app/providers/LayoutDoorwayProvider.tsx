@@ -16,17 +16,17 @@ export function LayoutDoorwayProvider({ children }: LayoutDoorwayProviderProps) 
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    const apiKey = localStorage.getItem("v2_current_api_key");
-    const appId = localStorage.getItem("v2_current_app_id");
+    // Check for new projectId first, fall back to appId for compatibility
+    const projectId = localStorage.getItem("v2_current_project_id") ||
+                     localStorage.getItem("v2_current_app_id");
 
-    if (apiKey && appId) {
+    if (projectId) {
       setConfig({
-        apiKey,
-        appId,
+        projectId,
         iframeElementId: "turnkey-auth-iframe-element-id",
         iframeUrl: "https://auth.turnkey.com",
         organizationId,
-        proxyBaseUrl: process.env.NEXT_PUBLIC_TURNKEY_PROXY_BASE_URL || "http://localhost:3001",
+        proxyBaseUrl: process.env.NEXT_PUBLIC_TURNKEY_PROXY_BASE_URL || "http://localhost:7082",
       });
     }
   }, []);
