@@ -15,46 +15,6 @@ importers:
         specifier: link:../../../Library/pnpm/global/5/node_modules/@doorway/core
         version: link:../../../Library/pnpm/global/5/node_modules/@doorway/core
 
-  packages/demo:
-    dependencies:
-      next:
-        specifier: 15.3.4
-        version: 15.3.4(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
-      react:
-        specifier: ^19.0.0
-        version: 19.1.1
-      react-dom:
-        specifier: ^19.0.0
-        version: 19.1.1(react@19.1.1)
-    devDependencies:
-      '@eslint/eslintrc':
-        specifier: ^3
-        version: 3.3.1
-      '@tailwindcss/postcss':
-        specifier: ^4
-        version: 4.1.12
-      '@types/node':
-        specifier: ^20
-        version: 20.19.11
-      '@types/react':
-        specifier: ^19
-        version: 19.1.10
-      '@types/react-dom':
-        specifier: ^19
-        version: 19.1.7(@types/react@19.1.10)
-      eslint:
-        specifier: ^9
-        version: 9.33.0(jiti@2.5.1)
-      eslint-config-next:
-        specifier: 15.3.4
-        version: 15.3.4(eslint@9.33.0(jiti@2.5.1))(typescript@5.9.2)
-      tailwindcss:
-        specifier: ^4
-        version: 4.1.12
-      typescript:
-        specifier: ^5
-        version: 5.9.2
-
   packages/doorway:
     dependencies:
       '@react-oauth/google':
@@ -71,10 +31,10 @@ importers:
         version: 4.6.0(typescript@5.9.2)
       '@turnkey/viem':
         specifier: ^0.10.5
-        version: 0.10.5(typescript@5.9.2)(viem@2.37.3(typescript@5.9.2))
+        version: 0.10.5(typescript@5.9.2)(viem@2.37.6(typescript@5.9.2))
       '@zerodev/sdk':
         specifier: ^5.0.0
-        version: 5.4.41(viem@2.37.3(typescript@5.9.2))
+        version: 5.4.41(viem@2.37.6(typescript@5.9.2))
       drizzle-kit:
         specifier: ^0.31.4
         version: 0.31.4
@@ -97,8 +57,8 @@ importers:
         specifier: ^7.59.0
         version: 7.62.0(react@19.1.1)
       viem:
-        specifier: ~2.37.0
-        version: 2.37.3(typescript@5.9.2)
+        specifier: 2.37.6
+        version: 2.37.6(typescript@5.9.2)
     devDependencies:
       '@eslint/eslintrc':
         specifier: ^3
@@ -2970,8 +2930,8 @@ packages:
     peerDependencies:
       react: ^16.8.0  || ^17 || ^18 || ^19 || ^19.0.0-rc
 
-  viem@2.37.3:
-    resolution: {integrity: sha512-hwoZqkFSy13GCFzIftgfIH8hNENvdlcHIvtLt73w91tL6rKmZjQisXWTahi1Vn5of8/JQ1FBKfwUus3YkDXwbw==}
+  viem@2.37.6:
+    resolution: {integrity: sha512-b+1IozQ8TciVQNdQUkOH5xtFR0z7ZxR8pyloENi/a+RA408lv4LoX12ofwoiT3ip0VRhO5ni1em//X0jn/eW0g==}
     peerDependencies:
       typescript: '>=5.0.4'
     peerDependenciesMeta:
@@ -3977,7 +3937,7 @@ snapshots:
 
   '@turnkey/sdk-types@0.3.0': {}
 
-  '@turnkey/viem@0.10.5(typescript@5.9.2)(viem@2.37.3(typescript@5.9.2))':
+  '@turnkey/viem@0.10.5(typescript@5.9.2)(viem@2.37.6(typescript@5.9.2))':
     dependencies:
       '@noble/curves': 1.8.0
       '@turnkey/api-key-stamper': 0.4.7
@@ -3985,7 +3945,7 @@ snapshots:
       '@turnkey/sdk-browser': 5.4.1(typescript@5.9.2)
       '@turnkey/sdk-server': 4.3.0(typescript@5.9.2)
       cross-fetch: 4.1.0
-      viem: 2.37.3(typescript@5.9.2)
+      viem: 2.37.6(typescript@5.9.2)
     transitivePeerDependencies:
       - bufferutil
       - encoding
@@ -3998,7 +3958,7 @@ snapshots:
       '@turnkey/crypto': 2.4.3
       '@turnkey/encoding': 0.5.0
     optionalDependencies:
-      viem: 2.37.3(typescript@5.9.2)
+      viem: 2.37.6(typescript@5.9.2)
     transitivePeerDependencies:
       - bufferutil
       - typescript
@@ -4010,7 +3970,7 @@ snapshots:
       '@turnkey/crypto': 2.5.0
       '@turnkey/encoding': 0.5.0
     optionalDependencies:
-      viem: 2.37.3(typescript@5.9.2)
+      viem: 2.37.6(typescript@5.9.2)
     transitivePeerDependencies:
       - bufferutil
       - typescript
@@ -4212,10 +4172,10 @@ snapshots:
 
   '@yarnpkg/lockfile@1.1.0': {}
 
-  '@zerodev/sdk@5.4.41(viem@2.37.3(typescript@5.9.2))':
+  '@zerodev/sdk@5.4.41(viem@2.37.6(typescript@5.9.2))':
     dependencies:
       semver: 7.7.2
-      viem: 2.37.3(typescript@5.9.2)
+      viem: 2.37.6(typescript@5.9.2)
 
   abitype@1.1.0(typescript@5.9.2):
     optionalDependencies:
@@ -6055,7 +6015,7 @@ snapshots:
       lodash.debounce: 4.0.8
       react: 19.1.1
 
-  viem@2.37.3(typescript@5.9.2):
+  viem@2.37.6(typescript@5.9.2):
     dependencies:
       '@noble/curves': 1.9.1
       '@noble/hashes': 1.8.0
