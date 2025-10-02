@@ -3,10 +3,11 @@
 import { useState } from "react";
 import { EmailAuthTest } from "../components/EmailAuthTest";
 import { OAuthTest } from "../components/OAuthTest";
+import PasskeyAuthTest from "../components/PasskeyAuthTest";
 import { SigningTest } from "../components/SigningTest";
 import { SendTransactionTest } from "../components/SendTransactionTest";
 
-type ActiveTab = "email" | "oauth" | "signing" | "send transaction";
+type ActiveTab = "email" | "oauth" | "passkey" | "signing" | "send transaction";
 
 export default function TestV2Page() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("email");
@@ -37,6 +38,7 @@ export default function TestV2Page() {
               {[
                 { id: "email", name: "Email Auth", icon: "📧" },
                 { id: "oauth", name: "OAuth Auth", icon: "🔐" },
+                { id: "passkey", name: "Passkey Auth", icon: "🔑" },
                 { id: "signing", name: "Payload Signing", icon: "✍️" },
                 {
                   id: "send transaction",
@@ -64,6 +66,7 @@ export default function TestV2Page() {
           <div className="p-6">
             {activeTab === "email" && <EmailAuthTest />}
             {activeTab === "oauth" && <OAuthTest />}
+            {activeTab === "passkey" && <PasskeyAuthTest />}
             {activeTab === "signing" && <SigningTest />}
             {activeTab === "send transaction" && <SendTransactionTest/>}
           </div>
