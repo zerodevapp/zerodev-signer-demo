@@ -190,7 +190,7 @@ export function SendTransactionTest() {
               id="to"
               value={formData.to}
               onChange={(e) => handleInputChange("to", e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-gray-900 placeholder-gray-500"
               placeholder="0x..."
             />
           </div>
@@ -207,7 +207,7 @@ export function SendTransactionTest() {
               id="value"
               value={formData.value}
               onChange={(e) => handleInputChange("value", e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-500"
               placeholder="0.001"
             />
           </div>
@@ -224,7 +224,7 @@ export function SendTransactionTest() {
               value={formData.data}
               onChange={(e) => handleInputChange("data", e.target.value)}
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm text-gray-900 placeholder-gray-500"
               placeholder="0x (leave empty for simple transfer)"
             />
           </div>

@@ -20,6 +20,7 @@ export function LayoutDoorwayProvider({ children }: LayoutDoorwayProviderProps) 
     const projectId = localStorage.getItem("v2_current_project_id") ||
                      localStorage.getItem("v2_current_app_id");
 
+                     console.log("projectId", projectId);
     if (projectId) {
       setConfig({
         projectId,

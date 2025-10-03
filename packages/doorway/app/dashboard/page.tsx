@@ -6,8 +6,9 @@ import { OAuthTest } from "../components/OAuthTest";
 import PasskeyAuthTest from "../components/PasskeyAuthTest";
 import { SigningTest } from "../components/SigningTest";
 import { SendTransactionTest } from "../components/SendTransactionTest";
+import { SessionManagement } from "../components/SessionManagement";
 
-type ActiveTab = "email" | "oauth" | "passkey" | "signing" | "send transaction";
+type ActiveTab = "email" | "oauth" | "passkey" | "signing" | "send transaction" | "session management";
 
 export default function TestV2Page() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("email");
@@ -33,19 +34,26 @@ export default function TestV2Page() {
           </div>
 
           {/* Tab Navigation */}
-          <div className="border-b border-gray-200">
-            <nav className="-mb-px flex space-x-8 px-6">
-              {[
-                { id: "email", name: "Email Auth", icon: "📧" },
-                { id: "oauth", name: "OAuth Auth", icon: "🔐" },
-                { id: "passkey", name: "Passkey Auth", icon: "🔑" },
-                { id: "signing", name: "Payload Signing", icon: "✍️" },
+          <div className="border-b border-gray-200 overflow-x-auto">
+            <nav className="-mb-px flex space-x-4 px-6 min-w-max">
+              {([
+                { id: "email", name: "Email Auth", shortName: "Email", icon: "📧" },
+                { id: "oauth", name: "OAuth Auth", shortName: "OAuth", icon: "🔐" },
+                { id: "passkey", name: "Passkey Auth", shortName: "Passkey", icon: "🔑" },
+                { id: "signing", name: "Payload Signing", shortName: "Signing", icon: "✍️" },
                 {
                   id: "send transaction",
                   name: "Send Transaction",
+                  shortName: "Transaction",
                   icon: "💰",
                 },
-              ].map((tab) => (
+                {
+                  id: "session management",
+                  name: "Session Management",
+                  shortName: "Sessions",
+                  icon: "🔄",
+                },
+              ] as const).map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as ActiveTab)}
@@ -56,7 +64,8 @@ export default function TestV2Page() {
                   } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center space-x-2`}
                 >
                   <span>{tab.icon}</span>
-                  <span>{tab.name}</span>
+                  <span className="hidden md:inline">{tab.name}</span>
+                  <span className="md:hidden">{tab.shortName}</span>
                 </button>
               ))}
             </nav>
@@ -69,6 +78,7 @@ export default function TestV2Page() {
             {activeTab === "passkey" && <PasskeyAuthTest />}
             {activeTab === "signing" && <SigningTest />}
             {activeTab === "send transaction" && <SendTransactionTest/>}
+            {activeTab === "session management" && <SessionManagement />}
           </div>
         </div>
       </div>

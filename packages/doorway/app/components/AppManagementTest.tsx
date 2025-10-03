@@ -163,7 +163,7 @@ export function AppManagementTest() {
               id="projectName"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-500"
               placeholder="My DeFi Project"
             />
           </div>
@@ -177,7 +177,7 @@ export function AppManagementTest() {
               id="chainId"
               value={formData.chain_id}
               onChange={(e) => setFormData({ ...formData, chain_id: parseInt(e.target.value) || 1 })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-500"
               placeholder="1"
             />
             <p className="text-xs text-gray-500 mt-1">
@@ -194,7 +194,7 @@ export function AppManagementTest() {
               id="teamId"
               value={formData.team_id}
               onChange={(e) => setFormData({ ...formData, team_id: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-500"
               placeholder="team_123"
             />
           </div>
@@ -208,7 +208,7 @@ export function AppManagementTest() {
               id="userId"
               value={formData.user_id}
               onChange={(e) => setFormData({ ...formData, user_id: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-500"
               placeholder="user_456"
             />
           </div>
@@ -253,7 +253,7 @@ export function AppManagementTest() {
                 id="manualProjectId"
                 value={manualProject.projectId}
                 onChange={(e) => setManualProject({ projectId: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-gray-900 placeholder-gray-500"
                 placeholder="proj_dk3j4h5k6j7h8"
               />
             </div>

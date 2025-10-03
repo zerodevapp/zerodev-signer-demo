@@ -26,6 +26,13 @@ export function useDoorwayProvider() {
     return await doorway.getSession()
   }
 
+  const refreshSession = async () => {
+    if (!doorway) {
+      throw new Error('Doorway SDK not initialized')
+    }
+    return await doorway.refreshSession()
+  }
+
   const logout = async () => {
     if (!doorway) {
       throw new Error('Doorway SDK not initialized')
@@ -52,6 +59,7 @@ export function useDoorwayProvider() {
     auth,
     getPublicKeys,
     getSession,
+    refreshSession,
     logout,
     toAccount
   }
