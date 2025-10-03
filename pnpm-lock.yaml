@@ -5,15 +5,19 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  '@doorway/core': link:../../../Library/pnpm/global/5/node_modules/@doorway/core
+  '@doorway/core': link:../../Library/pnpm/global/5/node_modules/@doorway/core
+  core: link:../../Library/pnpm/global/5/node_modules/@doorway/core
 
 importers:
 
   .:
     dependencies:
       '@doorway/core':
-        specifier: link:../../../Library/pnpm/global/5/node_modules/@doorway/core
-        version: link:../../../Library/pnpm/global/5/node_modules/@doorway/core
+        specifier: link:../../Library/pnpm/global/5/node_modules/@doorway/core
+        version: link:../../Library/pnpm/global/5/node_modules/@doorway/core
+      core:
+        specifier: link:../../Library/pnpm/global/5/node_modules/@doorway/core
+        version: link:../../Library/pnpm/global/5/node_modules/@doorway/core
 
   packages/doorway:
     dependencies:
