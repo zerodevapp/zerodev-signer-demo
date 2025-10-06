@@ -3,12 +3,13 @@
 import { useState } from "react";
 import { EmailAuthTest } from "../components/EmailAuthTest";
 import { OAuthTest } from "../components/OAuthTest";
+import { OTPAuthTest } from "../components/OTPAuthTest";
 import PasskeyAuthTest from "../components/PasskeyAuthTest";
 import { SigningTest } from "../components/SigningTest";
 import { SendTransactionTest } from "../components/SendTransactionTest";
 import { SessionManagement } from "../components/SessionManagement";
 
-type ActiveTab = "email" | "oauth" | "passkey" | "signing" | "send transaction" | "session management";
+type ActiveTab = "email" | "oauth" | "otp" | "passkey" | "signing" | "send transaction" | "session management";
 
 export default function TestV2Page() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("email");
@@ -34,11 +35,12 @@ export default function TestV2Page() {
           </div>
 
           {/* Tab Navigation */}
-          <div className="border-b border-gray-200 overflow-x-auto">
-            <nav className="-mb-px flex space-x-4 px-6 min-w-max">
+          <div className="border-b border-gray-200 overflow-x-auto scrollbar-hide">
+            <nav className="-mb-px flex space-x-2 px-4 min-w-max">
               {([
                 { id: "email", name: "Email Auth", shortName: "Email", icon: "📧" },
                 { id: "oauth", name: "OAuth Auth", shortName: "OAuth", icon: "🔐" },
+                { id: "otp", name: "OTP Auth", shortName: "OTP", icon: "🔢" },
                 { id: "passkey", name: "Passkey Auth", shortName: "Passkey", icon: "🔑" },
                 { id: "signing", name: "Payload Signing", shortName: "Signing", icon: "✍️" },
                 {
@@ -61,7 +63,7 @@ export default function TestV2Page() {
                     activeTab === tab.id
                       ? "border-blue-500 text-blue-600"
                       : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                  } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center space-x-2`}
+                  } whitespace-nowrap py-3 px-2 border-b-2 font-medium text-sm flex items-center space-x-1.5 flex-shrink-0`}
                 >
                   <span>{tab.icon}</span>
                   <span className="hidden md:inline">{tab.name}</span>
@@ -75,6 +77,7 @@ export default function TestV2Page() {
           <div className="p-6">
             {activeTab === "email" && <EmailAuthTest />}
             {activeTab === "oauth" && <OAuthTest />}
+            {activeTab === "otp" && <OTPAuthTest />}
             {activeTab === "passkey" && <PasskeyAuthTest />}
             {activeTab === "signing" && <SigningTest />}
             {activeTab === "send transaction" && <SendTransactionTest/>}
