@@ -16,18 +16,15 @@ export function LayoutDoorwayProvider({ children }: LayoutDoorwayProviderProps) 
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    // Check for new projectId first, fall back to appId for compatibility
-    const projectId = localStorage.getItem("v2_current_project_id") ||
-                     localStorage.getItem("v2_current_app_id");
+    const projectId = process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID;
 
-                     console.log("projectId", projectId);
     if (projectId) {
       setConfig({
         projectId,
         iframeElementId: "turnkey-auth-iframe-element-id",
         iframeUrl: "https://auth.turnkey.com",
         organizationId,
-        proxyBaseUrl: process.env.NEXT_PUBLIC_TURNKEY_PROXY_BASE_URL || "http://localhost:7082",
+        proxyBaseUrl: process.env.NEXT_PUBLIC_KMS_PROXY_BASE_URL || "http://localhost:7082",
       });
     }
   }, []);
