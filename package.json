@@ -1,5 +1,5 @@
 {
-  "name": "doorway-prototype",
+  "name": "zero-dev-signer-demo",
   "private": true,
   "workspaces": [
     "packages/*"
