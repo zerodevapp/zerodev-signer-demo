@@ -1,7 +1,42 @@
 {
   "name": "zero-dev-signer-demo",
+  "version": "0.1.0",
   "private": true,
-  "workspaces": [
-    "packages/*"
-  ]
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@react-oauth/google": "^0.12.2",
+    "@turnkey/sdk-browser": "^5.4.1",
+    "@turnkey/sdk-react": "^5.2.11",
+    "@turnkey/sdk-server": "^4.3.0",
+    "@turnkey/viem": "^0.10.5",
+    "@zerodev/sdk": "^5.0.0",
+    "@zerodev/signer-core": "0.0.1-alpha.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.545.0",
+    "next": "15.3.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-hook-form": "^7.59.0",
+    "tailwind-merge": "^3.3.1",
+    "viem": "2.37.6"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.3.4",
+    "patch-package": "^8.0.0",
+    "postinstall-postinstall": "^2.1.0",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
 }
