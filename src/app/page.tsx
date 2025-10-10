@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { GoogleLogin } from "@react-oauth/google";
-import { Mail, KeyRound, Smartphone, Chrome, Loader2, Info } from "lucide-react";
+import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
+import { Mail, KeyRound, Loader2, Info } from "lucide-react";
 import { sha256, type Hex } from "viem";
 import { cn } from "./lib/utils";
 import { useZeroDevSignerProvider } from "./hooks/useZeroDevSignerProvider";
@@ -44,6 +44,7 @@ export default function LandingPage() {
       }
     };
     generateNonce();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isReady]);
 
   // Optional: Add a "Continue to Dashboard" button if already logged in
@@ -61,8 +62,8 @@ export default function LandingPage() {
         mode: "register",
       });
       router.push("/dashboard");
-    } catch (err: any) {
-      setError(err.message || "Passkey registration failed");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Passkey registration failed");
     } finally {
       setLoadingAction(null);
     }
@@ -80,8 +81,8 @@ export default function LandingPage() {
         mode: "login",
       });
       router.push("/dashboard");
-    } catch (err: any) {
-      setError(err.message || "Passkey login failed");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Passkey login failed");
     } finally {
       setLoadingAction(null);
     }
@@ -102,8 +103,8 @@ export default function LandingPage() {
         },
       });
       setError("Magic link sent! Check your email.");
-    } catch (err: any) {
-      setError(err.message || "Failed to send magic link");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to send magic link");
     } finally {
       setLoadingAction(null);
     }
@@ -127,8 +128,8 @@ export default function LandingPage() {
       });
       setOtpStep('verify');
       setError("OTP code sent to your email");
-    } catch (err: any) {
-      setError(err.message || "Failed to send OTP");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to send OTP");
     } finally {
       setLoadingAction(null);
     }
@@ -148,8 +149,8 @@ export default function LandingPage() {
         subOrganizationId: otpData.subOrganizationId
       });
       router.push("/dashboard");
-    } catch (err: any) {
-      setError(err.message || "Invalid OTP code");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Invalid OTP code");
     } finally {
       setLoadingAction(null);
     }
@@ -162,7 +163,7 @@ export default function LandingPage() {
     setError("");
   };
 
-  const handleOAuthSuccess = async (credentialResponse: any) => {
+  const handleOAuthSuccess = async (credentialResponse: CredentialResponse) => {
     if (!credentialResponse.credential) {
       setError("No credential received from Google");
       return;
@@ -178,8 +179,8 @@ export default function LandingPage() {
         provider: "google",
       });
       router.push("/dashboard");
-    } catch (err: any) {
-      setError(err.message || "OAuth authentication failed");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "OAuth authentication failed");
     } finally {
       setLoadingAction(null);
     }

@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useZeroDevSignerProvider } from '../hooks/useZeroDevSignerProvider';
 
-export default function V2AuthVerify() {
+function VerifyContent() {
   const searchParams = useSearchParams();
   const { isLoading, error: sdkError, isReady, auth } = useZeroDevSignerProvider();
   const [verificationState, setVerificationState] = useState<'loading' | 'success' | 'error'>('loading');
@@ -45,6 +45,7 @@ export default function V2AuthVerify() {
     if (isReady) {
       tryLoginWithBundle();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isReady]);
 
   // SDK is still loading
@@ -126,5 +127,17 @@ export default function V2AuthVerify() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function EmailAuthVerify() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-gray-600">Loading...</div>
+      </div>
+    }>
+      <VerifyContent />
+    </Suspense>
   );
 }

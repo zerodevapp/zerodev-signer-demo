@@ -273,7 +273,7 @@ export function ZeroDevSignerProvider({ children, config }: ZeroDevSignerProvide
 
 // Export helper to schedule session expiration (for use after auth)
 export function useScheduleSessionExpiration() {
-  const { zeroDevSigner, sessionExpiring, timeRemaining } = useZeroDevSignerContext();
+  const { sessionExpiring, timeRemaining } = useZeroDevSignerContext();
 
   return {
     sessionExpiring,
