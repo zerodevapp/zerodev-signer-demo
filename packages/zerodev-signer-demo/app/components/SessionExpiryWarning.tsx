@@ -3,12 +3,12 @@
 import { useEffect, useState } from "react";
 import { AlertTriangle, X, RefreshCw } from "lucide-react";
 import { cn } from "../lib/utils";
-import { useScheduleSessionExpiration } from "../providers/DoorwayProvider";
-import { useDoorwayProvider } from "../hooks/useDoorwayProvider";
+import { useScheduleSessionExpiration } from "../providers/ZeroDevSignerProvider";
+import { useZeroDevSignerProvider } from "../hooks/useZeroDevSignerProvider";
 
 export function SessionExpiryWarning() {
   const { sessionExpiring, timeRemaining } = useScheduleSessionExpiration();
-  const { refreshSession } = useDoorwayProvider();
+  const { refreshSession } = useZeroDevSignerProvider();
   const [dismissed, setDismissed] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 

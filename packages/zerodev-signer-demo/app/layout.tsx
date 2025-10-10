@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { GoogleOAuthProvider } from "@react-oauth/google";
-import { LayoutDoorwayProvider } from "./providers/LayoutDoorwayProvider";
+import { LayoutZeroDevSignerProvider } from "./providers/LayoutZeroDevSignerProvider";
 
 import "./globals.css";
 
@@ -33,9 +33,9 @@ export default function RootLayout({
         <GoogleOAuthProvider
           clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}
         >
-          <LayoutDoorwayProvider>
+          <LayoutZeroDevSignerProvider>
             {children}
-          </LayoutDoorwayProvider>
+          </LayoutZeroDevSignerProvider>
         </GoogleOAuthProvider>
       </body>
     </html>

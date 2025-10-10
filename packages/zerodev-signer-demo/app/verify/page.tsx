@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useDoorwayProvider } from '../hooks/useDoorwayProvider';
+import { useZeroDevSignerProvider } from '../hooks/useZeroDevSignerProvider';
 
 export default function V2AuthVerify() {
   const searchParams = useSearchParams();
-  const { isLoading, error: sdkError, isReady, auth } = useDoorwayProvider();
+  const { isLoading, error: sdkError, isReady, auth } = useZeroDevSignerProvider();
   const [verificationState, setVerificationState] = useState<'loading' | 'success' | 'error'>('loading');
   const [errorMessage, setErrorMessage] = useState<string>('');
 

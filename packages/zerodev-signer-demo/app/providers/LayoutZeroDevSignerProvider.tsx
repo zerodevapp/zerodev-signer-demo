@@ -1,17 +1,17 @@
 "use client";
 
 import { useEffect, useState, ReactNode } from 'react';
-import { DoorwayProvider } from './DoorwayProvider';
-import { DoorwayConfig } from '@doorway/core';
+import { ZeroDevSignerProvider } from './ZeroDevSignerProvider';
+import { ZeroDevSignerConfig } from '@zerodev/signer-core';
 
-interface LayoutDoorwayProviderProps {
+interface LayoutZeroDevSignerProviderProps {
   children: ReactNode;
 }
 
 const organizationId = process.env.NEXT_PUBLIC_TURNKEY_ORGANIZATION_ID
 
-export function LayoutDoorwayProvider({ children }: LayoutDoorwayProviderProps) {
-  const [config, setConfig] = useState<DoorwayConfig | null>(null);
+export function LayoutZeroDevSignerProvider({ children }: LayoutZeroDevSignerProviderProps) {
+  const [config, setConfig] = useState<ZeroDevSignerConfig | null>(null);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -29,12 +29,12 @@ export function LayoutDoorwayProvider({ children }: LayoutDoorwayProviderProps) 
     }
   }, []);
 
-  // If we have config, wrap with DoorwayProvider
+  // If we have config, wrap with ZeroDevSignerProvider
   if (config) {
     return (
-      <DoorwayProvider config={config}>
+      <ZeroDevSignerProvider config={config}>
         {children}
-      </DoorwayProvider>
+      </ZeroDevSignerProvider>
     );
   }
 

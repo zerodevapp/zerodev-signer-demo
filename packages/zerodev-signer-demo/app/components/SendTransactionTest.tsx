@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Send, Zap, AlertCircle, Loader2, Check, ExternalLink } from "lucide-react";
 import { cn } from "../lib/utils";
-import { useDoorwayProvider } from "../hooks/useDoorwayProvider";
+import { useZeroDevSignerProvider } from "../hooks/useZeroDevSignerProvider";
 import {
   type Address,
   createWalletClient,
@@ -32,7 +32,7 @@ export function SendTransactionTest() {
   const [error, setError] = useState<string>("");
   const [isGasless, setIsGasless] = useState(false);
 
-  const { isReady, toAccount } = useDoorwayProvider();
+  const { isReady, toAccount } = useZeroDevSignerProvider();
 
   const handleSendTransaction = async () => {
     if (!isReady) {

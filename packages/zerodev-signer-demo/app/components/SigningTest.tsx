@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { FileSignature, Check, AlertCircle, Loader2, Sparkles } from "lucide-react";
 import { cn } from "../lib/utils";
-import { useDoorwayProvider } from "../hooks/useDoorwayProvider";
+import { useZeroDevSignerProvider } from "../hooks/useZeroDevSignerProvider";
 import {
   type Hex,
   verifyMessage,
@@ -25,15 +25,43 @@ type VerificationResult = {
   isValid: boolean;
 };
 
+const typedData = {
+  domain: {
+    name: "Ether Mail",
+    version: "1",
+    chainId: 1,
+    verifyingContract: "0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC",
+  },
+  types: {
+    Person: [
+      { name: "name", type: "string" },
+      { name: "wallet", type: "address" },
+    ],
+    Mail: [
+      { name: "from", type: "Person" },
+      { name: "to", type: "Person" },
+      { name: "contents", type: "string" },
+    ],
+  },
+  primaryType: "Mail",
+  message: {
+    from: { name: "Cow", wallet: "0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826" },
+    to: { name: "Bob", wallet: "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB" },
+    contents: "Hello, Bob!",
+  },
+};
+
+const message = "Hello World";
+
 export function SigningTest() {
   const [mode, setMode] = useState<SigningMode>("message");
-  const [payload, setPayload] = useState("Hello World");
+  const [payload, setPayload] = useState(message);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<Hex | null>(null);
   const [verificationResult, setVerificationResult] = useState<VerificationResult | null>(null);
   const [error, setError] = useState<string>("");
 
-  const { isReady, toAccount } = useDoorwayProvider();
+  const { isReady, toAccount } = useZeroDevSignerProvider();
 
   const handleSign = async () => {
     if (!isReady) {
@@ -82,33 +110,33 @@ export function SigningTest() {
 
   const loadSample = () => {
     if (mode === "message") {
-      setPayload("Hello World");
+      setPayload(message);
     } else {
-      const typedData = {
-        domain: {
-          name: "Ether Mail",
-          version: "1",
-          chainId: 1,
-          verifyingContract: "0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC",
-        },
-        types: {
-          Person: [
-            { name: "name", type: "string" },
-            { name: "wallet", type: "address" },
-          ],
-          Mail: [
-            { name: "from", type: "Person" },
-            { name: "to", type: "Person" },
-            { name: "contents", type: "string" },
-          ],
-        },
-        primaryType: "Mail",
-        message: {
-          from: { name: "Cow", wallet: "0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826" },
-          to: { name: "Bob", wallet: "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB" },
-          contents: "Hello, Bob!",
-        },
-      };
+      // const typedData = {
+      //   domain: {
+      //     name: "Ether Mail",
+      //     version: "1",
+      //     chainId: 1,
+      //     verifyingContract: "0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC",
+      //   },
+      //   types: {
+      //     Person: [
+      //       { name: "name", type: "string" },
+      //       { name: "wallet", type: "address" },
+      //     ],
+      //     Mail: [
+      //       { name: "from", type: "Person" },
+      //       { name: "to", type: "Person" },
+      //       { name: "contents", type: "string" },
+      //     ],
+      //   },
+      //   primaryType: "Mail",
+      //   message: {
+      //     from: { name: "Cow", wallet: "0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826" },
+      //     to: { name: "Bob", wallet: "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB" },
+      //     contents: "Hello, Bob!",
+      //   },
+      // };
       setPayload(JSON.stringify(typedData, null, 2));
     }
   };
@@ -134,7 +162,7 @@ export function SigningTest() {
           Message
         </button>
         <button
-          onClick={() => { setMode("typedData"); setPayload(""); setResult(null); setVerificationResult(null); }}
+          onClick={() => { setMode("typedData"); setPayload(JSON.stringify(typedData, null, 2)); setResult(null); setVerificationResult(null); }}
           className={cn(
             "flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all",
             mode === "typedData" ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900"

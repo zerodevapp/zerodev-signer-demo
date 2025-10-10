@@ -18,7 +18,7 @@ import { cn } from "../lib/utils";
 import { SigningTest } from "../components/SigningTest";
 import { SendTransactionTest } from "../components/SendTransactionTest";
 import { SessionExpiryWarning } from "../components/SessionExpiryWarning";
-import { useDoorwayProvider } from "../hooks/useDoorwayProvider";
+import { useZeroDevSignerProvider } from "../hooks/useZeroDevSignerProvider";
 
 type ActiveTab = "signing" | "transaction";
 
@@ -34,7 +34,7 @@ export default function DashboardPage() {
   const [balance, setBalance] = useState<string>("0");
   const [copied, setCopied] = useState(false);
 
-  const { getSession, toAccount, logout, isReady, isLoading } = useDoorwayProvider();
+  const { getSession, toAccount, logout, isReady, isLoading } = useZeroDevSignerProvider();
 
   useEffect(() => {
     const loadSession = async () => {
@@ -147,7 +147,7 @@ export default function DashboardPage() {
                   strokeLinejoin="round"
                 />
               </svg>
-              <span className="text-lg font-semibold text-gray-900">doorway</span>
+              <span className="text-lg font-semibold text-gray-900">ZeroDev Signer</span>
               <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full font-medium">
                 Demo
               </span>

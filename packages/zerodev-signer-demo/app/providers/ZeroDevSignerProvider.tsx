@@ -9,12 +9,12 @@ import React, {
   ReactNode,
 } from "react";
 import {
-  createDoorway,
-  type DoorwaySDK,
-  type DoorwayConfig,
-  type DoorwaySession,
+  createZeroDevSigner,
+  type ZeroDevSignerSDK,
+  type ZeroDevSignerConfig,
+  type ZeroDevSignerSession,
   normalizeTimestamp,
-} from "@doorway/core";
+} from "@zerodev/signer-core";
 import {
   type TimerMap,
   clearAll,
@@ -28,18 +28,18 @@ import {
 const SESSION_WARNING_THRESHOLD_MS = 60 * 1000; // Very high for testing - fires ~10s after auth
 const AUTO_REFRESH_ENABLED = true; // Hardcoded for now, will be config later
 
-interface DoorwayContextType {
-  doorway: DoorwaySDK | null;
+interface ZeroDevSignerContextType {
+  zeroDevSigner: ZeroDevSignerSDK | null;
   isLoading: boolean;
   error: string | null;
   sessionExpiring: boolean;
   timeRemaining: number;
-  scheduleSessionExpiration: ((session: DoorwaySession) => Promise<void>) | null;
+  scheduleSessionExpiration: ((session: ZeroDevSignerSession) => Promise<void>) | null;
   clearAllTimers: (() => void) | null;
 }
 
-const DoorwayContext = createContext<DoorwayContextType>({
-  doorway: null,
+const ZeroDevSignerContext = createContext<ZeroDevSignerContextType>({
+  zeroDevSigner: null,
   isLoading: false,
   error: null,
   sessionExpiring: false,
@@ -48,14 +48,14 @@ const DoorwayContext = createContext<DoorwayContextType>({
   clearAllTimers: null,
 });
 
-interface DoorwayProviderProps {
+interface ZeroDevSignerProviderProps {
   children: ReactNode;
-  config: Omit<DoorwayConfig, "iframeContainer">; // We'll handle iframe container internally
+  config: Omit<ZeroDevSignerConfig, "iframeContainer">; // We'll handle iframe container internally
 }
 
-export function DoorwayProvider({ children, config }: DoorwayProviderProps) {
+export function ZeroDevSignerProvider({ children, config }: ZeroDevSignerProviderProps) {
   const initRef = useRef<boolean>(false);
-  const [doorway, setDoorway] = useState<DoorwaySDK | null>(null);
+  const [zeroDevSigner, setZeroDevSigner] = useState<ZeroDevSignerSDK | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sessionExpiring, setSessionExpiring] = useState(false);
@@ -69,10 +69,10 @@ export function DoorwayProvider({ children, config }: DoorwayProviderProps) {
   const iframeElementId = "turnkey-auth-iframe-element-id";
 
   // Schedule session expiration timers
-  const scheduleSessionExpirationRef = useRef<((session: DoorwaySession) => Promise<void>) | null>(null);
+  const scheduleSessionExpirationRef = useRef<((session: ZeroDevSignerSession) => Promise<void>) | null>(null);
 
   // Internal function that takes sdk directly (avoids race condition)
-  const scheduleSessionExpirationForSdk = async (sdk: DoorwaySDK, session: DoorwaySession) => {
+  const scheduleSessionExpirationForSdk = async (sdk: ZeroDevSignerSDK, session: ZeroDevSignerSession) => {
     console.log("scheduleSessionExpiration", session);
 
     if (!sdk) {
@@ -167,13 +167,13 @@ export function DoorwayProvider({ children, config }: DoorwayProviderProps) {
     );
   };
 
-  // Wrapper that uses current doorway state
-  const scheduleSessionExpiration = async (session: DoorwaySession) => {
-    if (!doorway) {
-      console.error("Cannot schedule - doorway not initialized");
+  // Wrapper that uses current zeroDevSigner state
+  const scheduleSessionExpiration = async (session: ZeroDevSignerSession) => {
+    if (!zeroDevSigner) {
+      console.error("Cannot schedule - zeroDevSigner not initialized");
       return;
     }
-    return scheduleSessionExpirationForSdk(doorway, session);
+    return scheduleSessionExpirationForSdk(zeroDevSigner, session);
   };
 
   // Clear all timers function
@@ -192,7 +192,7 @@ export function DoorwayProvider({ children, config }: DoorwayProviderProps) {
     if (initRef.current) return;
     initRef.current = true;
 
-    async function initializeDoorway() {
+    async function initializeZeroDevSigner() {
       try {
         setIsLoading(true);
         setError(null);
@@ -204,16 +204,16 @@ export function DoorwayProvider({ children, config }: DoorwayProviderProps) {
           throw new Error(`Iframe container not found`);
         }
 
-        console.log("Creating new Doorway SDK instance");
-        const sdk = await createDoorway({
+        console.log("Creating new ZeroDevSigner SDK instance");
+        const sdk = await createZeroDevSigner({
           ...config,
           iframeContainer,
           iframeElementId,
         });
 
-        setDoorway(sdk);
+        setZeroDevSigner(sdk);
 
-        // Wait for next tick so doorway state is set
+        // Wait for next tick so zeroDevSigner state is set
         await new Promise(resolve => setTimeout(resolve, 0));
 
         // Check for existing session and schedule expiration
@@ -221,7 +221,7 @@ export function DoorwayProvider({ children, config }: DoorwayProviderProps) {
           const existingSession = await sdk.getSession();
           if (existingSession) {
             console.log('Found existing session, scheduling expiration');
-            // Call the function directly with sdk, not using doorway state
+            // Call the function directly with sdk, not using zeroDevSigner state
             scheduleSessionExpirationForSdk(sdk, existingSession);
           }
         } catch (err) {
@@ -234,7 +234,7 @@ export function DoorwayProvider({ children, config }: DoorwayProviderProps) {
       }
     }
 
-    initializeDoorway();
+    initializeZeroDevSigner();
 
     // Cleanup timers on unmount
     return () => {
@@ -244,8 +244,8 @@ export function DoorwayProvider({ children, config }: DoorwayProviderProps) {
   }, []);
 
   return (
-    <DoorwayContext.Provider value={{
-      doorway,
+    <ZeroDevSignerContext.Provider value={{
+      zeroDevSigner,
       isLoading,
       error,
       sessionExpiring,
@@ -267,13 +267,13 @@ export function DoorwayProvider({ children, config }: DoorwayProviderProps) {
         }}
       />
       {children}
-    </DoorwayContext.Provider>
+    </ZeroDevSignerContext.Provider>
   );
 }
 
 // Export helper to schedule session expiration (for use after auth)
 export function useScheduleSessionExpiration() {
-  const { doorway, sessionExpiring, timeRemaining } = useDoorwayContext();
+  const { zeroDevSigner, sessionExpiring, timeRemaining } = useZeroDevSignerContext();
 
   return {
     sessionExpiring,
@@ -281,11 +281,11 @@ export function useScheduleSessionExpiration() {
   };
 }
 
-export const useDoorwayContext = () => {
-  const context = useContext(DoorwayContext);
+export const useZeroDevSignerContext = () => {
+  const context = useContext(ZeroDevSignerContext);
 
   if (context === undefined) {
-    throw new Error("useDoorwayContext must be used within a DoorwayProvider");
+    throw new Error("useZeroDevSignerContext must be used within a ZeroDevSignerProvider");
   }
 
   return context;

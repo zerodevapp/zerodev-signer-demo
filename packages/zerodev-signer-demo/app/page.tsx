@@ -6,7 +6,7 @@ import { GoogleLogin } from "@react-oauth/google";
 import { Mail, KeyRound, Smartphone, Chrome, Loader2, Info } from "lucide-react";
 import { sha256, type Hex } from "viem";
 import { cn } from "./lib/utils";
-import { useDoorwayProvider } from "./hooks/useDoorwayProvider";
+import { useZeroDevSignerProvider } from "./hooks/useZeroDevSignerProvider";
 
 type OTPStep = 'send' | 'verify';
 
@@ -27,7 +27,7 @@ export default function LandingPage() {
   // OAuth state
   const [nonce, setNonce] = useState<string>("");
 
-  const { isReady, auth, getPublicKeys } = useDoorwayProvider();
+  const { isReady, auth, getPublicKeys } = useZeroDevSignerProvider();
 
   // Generate nonce for OAuth
   useEffect(() => {
@@ -92,12 +92,13 @@ export default function LandingPage() {
     setLoadingAction("email");
     setError("");
 
+    console.log(`${window.location.origin}/verify?bundle=%s`)
     try {
       await auth({
         type: "email",
         email,
         emailCustomization: {
-          magicLinkTemplate: process.env.NEXT_PUBLIC_APP_URL + '/verify?bundle=%s'
+          magicLinkTemplate: `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/verify?bundle=%s`
         },
       });
       setError("Magic link sent! Check your email.");
@@ -225,7 +226,7 @@ export default function LandingPage() {
               </span>
             </div>
             <div>
-              <h1 className="text-2xl font-semibold tracking-tight text-gray-900">doorway</h1>
+              <h1 className="text-2xl font-semibold tracking-tight text-gray-900">ZeroDev Signer</h1>
               <p className="text-sm text-gray-500 mt-2 font-medium">Log in or sign up</p>
             </div>
           </div>
