@@ -467,7 +467,7 @@ export default function LandingPage() {
             <div className="mx-8 mb-6 flex items-center gap-2 px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600">
               <Info className="h-4 w-4 flex-shrink-0" />
               <span>
-                SDK initializing... Visit <button onClick={() => router.push("/setup")} className="underline font-semibold">setup</button> first
+                SDK initializing...
               </span>
             </div>
           )}
