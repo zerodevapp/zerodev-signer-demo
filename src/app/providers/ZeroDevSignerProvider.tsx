@@ -207,8 +207,6 @@ export function ZeroDevSignerProvider({ children, config }: ZeroDevSignerProvide
         console.log("Creating new ZeroDevSigner SDK instance");
         const sdk = await createZeroDevSigner({
           ...config,
-          iframeContainer,
-          iframeElementId,
         });
 
         setZeroDevSigner(sdk);

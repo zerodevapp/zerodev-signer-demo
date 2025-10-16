@@ -21,8 +21,8 @@ export function LayoutZeroDevSignerProvider({ children }: LayoutZeroDevSignerPro
     if (projectId) {
       setConfig({
         projectId,
-        iframeElementId: "turnkey-auth-iframe-element-id",
-        iframeUrl: "https://auth.turnkey.com",
+        // iframeElementId: "turnkey-auth-iframe-element-id",
+        // iframeUrl: "https://auth.turnkey.com",
         organizationId,
         proxyBaseUrl: process.env.NEXT_PUBLIC_KMS_PROXY_BASE_URL || "http://localhost:7082",
       });

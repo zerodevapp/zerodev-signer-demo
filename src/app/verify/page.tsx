@@ -13,10 +13,19 @@ function VerifyContent() {
   useEffect(() => {
     async function tryLoginWithBundle() {
       if (isReady) {
-        const bundle = searchParams.get('bundle')
-        if (!bundle) {
+        const otp = searchParams.get('otp')
+        console.log('otp', otp)
+        const otpId = localStorage.getItem("otpId");
+        const subOrganizationId = localStorage.getItem("subOrganizationId");
+        if (!otpId || !subOrganizationId) {
           setVerificationState('error');
-          setErrorMessage('No authentication bundle found in URL');
+          setErrorMessage('No OTP ID or subOrganization ID found');
+          return;
+        }
+
+        if (!otp) {
+          setVerificationState('error');
+          setErrorMessage('No OTP found in URL');
           return;
         }
         
@@ -25,8 +34,11 @@ function VerifyContent() {
         
         try {
           await auth({
-            type: "email",
-            bundle,
+            type: "otp",
+            mode: "verifyOtp",
+            otpId,
+            otpCode: otp,
+            subOrganizationId,
           });
 
           setVerificationState('success');

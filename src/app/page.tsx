@@ -27,14 +27,14 @@ export default function LandingPage() {
   // OAuth state
   const [nonce, setNonce] = useState<string>("");
 
-  const { isReady, auth, getPublicKeys } = useZeroDevSignerProvider();
+  const { isReady, auth, getPublicKey } = useZeroDevSignerProvider();
 
   // Generate nonce for OAuth
   useEffect(() => {
     const generateNonce = async () => {
       if (isReady) {
         try {
-          const { compressedPublicKey } = await getPublicKeys();
+          const compressedPublicKey = await getPublicKey();
           console.log("compressedPublicKey", compressedPublicKey);
           const nonceHash = sha256(compressedPublicKey as Hex);
           setNonce(nonceHash.replace(/^0x/, ""));
@@ -93,15 +93,19 @@ export default function LandingPage() {
     setLoadingAction("email");
     setError("");
 
-    console.log(`${window.location.origin}/verify?bundle=%s`)
     try {
-      await auth({
-        type: "email",
-        email,
+      const data = await auth({
+        type: "otp",
+        mode: "sendOtp",
+        email: email,
+        contact: { type: "email", contact: email },
         emailCustomization: {
-          magicLinkTemplate: `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/verify?bundle=%s`
+          magicLinkTemplate: `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/verify?otp=%s`
         },
       });
+      console.log("data", data);
+      localStorage.setItem("otpId", data.otpId);
+      localStorage.setItem("subOrganizationId", data.subOrganizationId);
       setError("Magic link sent! Check your email.");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to send magic link");
@@ -118,9 +122,9 @@ export default function LandingPage() {
     try {
       const data = await auth({
         type: "otp",
-        mode: "register",
+        mode: "sendOtp",
         email,
-        contact: { type: "email", contact: email }
+        contact: { type: "email", contact: email },
       });
       setOtpData({
         otpId: data.otpId,
@@ -143,7 +147,7 @@ export default function LandingPage() {
     try {
       await auth({
         type: "otp",
-        mode: "login",
+        mode: "verifyOtp",
         otpId: otpData.otpId,
         otpCode: otpCode,
         subOrganizationId: otpData.subOrganizationId

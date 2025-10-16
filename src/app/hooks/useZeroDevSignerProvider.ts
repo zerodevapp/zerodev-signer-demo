@@ -25,11 +25,11 @@ export function useZeroDevSignerProvider() {
     return result
   }
 
-  const getPublicKeys = async () => {
+  const getPublicKey = async () => {
     if (!zeroDevSigner) {
       throw new Error('ZeroDevSigner SDK not initialized')
     }
-    return await zeroDevSigner.getPublicKeys()
+    return await zeroDevSigner.getPublicKey()
   }
 
   const getSession = async () => {
@@ -85,7 +85,7 @@ export function useZeroDevSignerProvider() {
 
     // Methods
     auth,
-    getPublicKeys,
+    getPublicKey,
     getSession,
     refreshSession,
     logout,
