@@ -25,7 +25,7 @@ export async function sendGaslessTransaction({
   data,
   value,
 }: GaslessTransactionParams) {
-  const ZERODEV_RPC = `https://rpc.zerodev.app/api/v3/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}/chain/11155111`;
+  const ZERODEV_RPC = `${process.env.NEXT_PUBLIC_ZERODEV_URL || "https://rpc.zerodev.app"}/api/v3/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}/chain/11155111`;
 
   if (!ZERODEV_RPC) {
     throw new Error("ZERODEV_RPC_URL is not set");
