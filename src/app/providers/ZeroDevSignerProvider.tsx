@@ -64,10 +64,6 @@ export function ZeroDevSignerProvider({ children, config }: ZeroDevSignerProvide
   // Timer management
   const expiryTimersRef = useRef<TimerMap>({});
 
-  // Fixed iframe container and element IDs
-  // const iframeContainerId = "turnkey-auth-iframe-container-id";
-  // const iframeElementId = "turnkey-auth-iframe-element-id";
-
   // Schedule session expiration timers
   const scheduleSessionExpirationRef = useRef<((session: ZeroDevSignerSession) => Promise<void>) | null>(null);
 
@@ -241,6 +237,8 @@ export function ZeroDevSignerProvider({ children, config }: ZeroDevSignerProvide
     };
   }, []);
 
+
+
   return (
     <ZeroDevSignerContext.Provider value={{
       zeroDevSigner,
@@ -251,19 +249,6 @@ export function ZeroDevSignerProvider({ children, config }: ZeroDevSignerProvide
       scheduleSessionExpiration: scheduleSessionExpirationRef.current,
       clearAllTimers: clearAllTimersFunc
     }}>
-      {/* Pre-create the iframe container - this prevents the re-initialization error */}
-      {/*<div
-        id={iframeContainerId}
-        style={{
-          display: "none",
-          position: "fixed",
-          top: "-9999px",
-          left: "-9999px",
-          width: "1px",
-          height: "1px",
-          pointerEvents: "none",
-        }}
-      />*/}
       {children}
     </ZeroDevSignerContext.Provider>
   );
