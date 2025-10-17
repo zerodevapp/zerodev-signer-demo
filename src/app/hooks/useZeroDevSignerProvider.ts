@@ -1,5 +1,6 @@
 import { useZeroDevSignerContext } from '../providers/ZeroDevSignerProvider'
 import type { AuthParams } from '@zerodev/signer-core'
+import { exportWallet as exportWalletSdk, createIframeStamper } from '@zerodev/signer-core'
 
 export function useZeroDevSignerProvider() {
   const { zeroDevSigner, isLoading, error, sessionExpiring, timeRemaining, scheduleSessionExpiration, clearAllTimers } = useZeroDevSignerContext()
@@ -65,6 +66,29 @@ export function useZeroDevSignerProvider() {
     return await zeroDevSigner.logout()
   }
 
+  const exportWallet = async (iframeContainerId: string) => {
+    if (!zeroDevSigner) {
+      throw new Error('ZeroDevSigner SDK not initialized')
+    }
+    const iframeContainer = document.getElementById(iframeContainerId)
+    if (!iframeContainer) {
+      throw new Error('Iframe container not found')
+    }
+    const iframeStamper = await createIframeStamper({
+      iframeUrl: "https://export.turnkey.com",
+      iframeContainer,
+      iframeElementId: "export-wallet-iframe",
+    })
+    const publicKey = await iframeStamper.init()
+    const { exportBundle, organizationId } = await exportWalletSdk({ signer: zeroDevSigner, targetPublicKey: publicKey })
+
+    // Inject export bundle into iframe
+    const success = await iframeStamper.injectWalletExportBundle(exportBundle, organizationId);
+    if (success !== true) {
+      throw new Error("unexpected error while injecting export bundle");
+    }
+  }
+
   const toAccount = async () => {
     if (!zeroDevSigner) {
       throw new Error('ZeroDevSigner SDK not initialized')
@@ -75,6 +99,7 @@ export function useZeroDevSignerProvider() {
   return {
     // Raw SDK instance (for advanced usage)
     zeroDevSigner,
+    exportWallet,
 
     // State
     isLoading,
