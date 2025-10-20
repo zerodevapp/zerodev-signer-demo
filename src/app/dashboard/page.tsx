@@ -11,12 +11,14 @@ import {
   Copy,
   LogOut,
   Loader2,
-  Check
+  Check,
+  Upload
 } from "lucide-react";
 import { cn } from "../lib/utils";
 import { SigningTest } from "../components/SigningTest";
 import { SendTransactionTest } from "../components/SendTransactionTest";
 import { SessionExpiryWarning } from "../components/SessionExpiryWarning";
+import { ExportWalletModal } from "../components/ExportWalletModal";
 import { useZeroDevSignerProvider } from "../hooks/useZeroDevSignerProvider";
 
 type ActiveTab = "signing" | "transaction";
@@ -32,6 +34,7 @@ export default function DashboardPage() {
   const [walletAddress, setWalletAddress] = useState<string>("");
   const [balance, setBalance] = useState<string>("0");
   const [copied, setCopied] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
 
   const { getSession, toAccount, logout, isReady } = useZeroDevSignerProvider();
 
@@ -121,6 +124,7 @@ export default function DashboardPage() {
   return (
     <>
       <SessionExpiryWarning />
+      <ExportWalletModal isOpen={showExportModal} onClose={() => setShowExportModal(false)} />
       <div className="min-h-screen bg-white">
         {/* Header */}
         <header className="bg-white border-b border-gray-100">
@@ -200,12 +204,24 @@ export default function DashboardPage() {
                 <Wallet className="h-5 w-5 text-gray-700" />
                 <h1 className="text-lg font-semibold text-gray-900">Default Wallet</h1>
               </div>
+              <button
+                onClick={() => setShowExportModal(true)}
+                className={cn(
+                  "px-3 py-1.5 rounded-lg text-sm font-medium transition-all",
+                  "border border-gray-200 text-gray-700 hover:bg-gray-50",
+                  "flex items-center gap-2"
+                )}
+              >
+                <Upload className="h-4 w-4" />
+                <span className="hidden sm:inline">Export</span>
+              </button>
             </div>
             <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
               <span className="font-mono text-xs sm:text-sm break-all">{walletAddress}</span>
               <button
                 onClick={handleCopy}
                 className="text-gray-400 hover:text-gray-600 flex-shrink-0"
+                title="Copy address"
               >
                 {copied ? (
                   <Check className="h-3.5 w-3.5 text-green-600" />

@@ -27,8 +27,8 @@ importers:
         specifier: ^5.0.0
         version: 5.5.3(viem@2.37.6(typescript@5.9.3))
       '@zerodev/signer-core':
-        specifier: 0.0.1-alpha.1
-        version: 0.0.1-alpha.1(viem@2.37.6(typescript@5.9.3))
+        specifier: 0.0.1-alpha.2
+        version: 0.0.1-alpha.2(viem@2.37.6(typescript@5.9.3))
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -1086,8 +1086,8 @@ packages:
     peerDependencies:
       viem: ^2.28.0
 
-  '@zerodev/signer-core@0.0.1-alpha.1':
-    resolution: {integrity: sha512-ku48r3Uu29ON3r50u08vRcXuAsrK3Yfte5K/A3egkrIR3RMiSDGmH316GOMfU1cqa9diQLMae0+uNgPXW3apuA==}
+  '@zerodev/signer-core@0.0.1-alpha.2':
+    resolution: {integrity: sha512-aHqS0wsfVuQH0fMeR5eYA4iAbtlfZ6JyaeWJ9xI7kf16Rel0M1bW6PiTWYGnVlZFyp3eQUXk16w7+Vl9smEdcw==}
     peerDependencies:
       viem: 2.37.6
 
@@ -3717,7 +3717,7 @@ snapshots:
       semver: 7.7.3
       viem: 2.37.6(typescript@5.9.3)
 
-  '@zerodev/signer-core@0.0.1-alpha.1(viem@2.37.6(typescript@5.9.3))':
+  '@zerodev/signer-core@0.0.1-alpha.2(viem@2.37.6(typescript@5.9.3))':
     dependencies:
       '@turnkey/http': 3.13.0
       '@turnkey/iframe-stamper': 2.7.0
