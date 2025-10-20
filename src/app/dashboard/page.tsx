@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { createPublicClient, http, formatEther } from "viem";
+import { createPublicClient, http, formatEther, Address, isAddress } from "viem";
 import { sepolia } from "viem/chains";
 import {
   FileSignature,
@@ -60,23 +60,33 @@ export default function DashboardPage() {
         const account = await toAccount();
         console.log("Dashboard: Account loaded:", account.address);
         setWalletAddress(account.address);
-
-        // Fetch balance
-        const publicClient = createPublicClient({
-          chain: sepolia,
-          transport: http(process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL),
-        });
-        const balanceWei = await publicClient.getBalance({ address: account.address });
-        setBalance(formatEther(balanceWei));
-        console.log("Dashboard: Balance loaded:", formatEther(balanceWei), "ETH");
       } catch (err) {
         console.error("Dashboard: Failed to load session/account:", err);
-        // If there's an error, redirect to login after a delay
         setTimeout(() => router.push("/"), 100);
       }
     };
     loadSession();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isReady, getSession, toAccount, router]);
+
+  useEffect(() => {
+    const loadBalance = async () => {
+      if (walletAddress && isAddress(walletAddress)) {
+        try {
+          const publicClient = createPublicClient({
+            chain: sepolia,
+            transport: http(process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL),
+          });
+          const balanceWei = await publicClient.getBalance({ address: walletAddress as Address });
+          setBalance(formatEther(balanceWei));
+        } catch (err) {
+          console.error("Dashboard: Failed to load balance:", err);
+          setBalance("0");
+        }
+      }
+    };
+    loadBalance();
+  }, [walletAddress]);
 
   const handleCopy = async () => {
     if (!walletAddress) return;
