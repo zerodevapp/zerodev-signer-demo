@@ -1,20 +1,20 @@
-import { useZeroDevSignerContext } from '../providers/ZeroDevSignerProvider'
-import type { AuthParams } from '@zerodev/signer-core'
-import { exportWallet as exportWalletSdk, createIframeStamper } from '@zerodev/signer-core'
+import { useZeroDevWalletContext } from '../providers/ZeroDevWalletProvider'
+import type { AuthParams } from '@zerodev/wallet-core'
+import { exportWallet as exportWalletSdk, createIframeStamper } from '@zerodev/wallet-core'
 
-export function useZeroDevSignerProvider() {
-  const { zeroDevSigner, isLoading, error, sessionExpiring, timeRemaining, scheduleSessionExpiration, clearAllTimers } = useZeroDevSignerContext()
+export function useZeroDevWalletProvider() {
+  const { zeroDevWallet, isLoading, error, sessionExpiring, timeRemaining, scheduleSessionExpiration, clearAllTimers } = useZeroDevWalletContext()
 
   // Helper functions that wrap the SDK methods with error handling
   const auth = async (params: AuthParams) => {
-    if (!zeroDevSigner) {
-      throw new Error('ZeroDevSigner SDK not initialized')
+    if (!zeroDevWallet) {
+      throw new Error('ZeroDevWallet SDK not initialized')
     }
-    const result = await zeroDevSigner.auth(params)
+    const result = await zeroDevWallet.auth(params)
 
     // After successful auth, schedule session expiration
     try {
-      const session = await zeroDevSigner.getSession()
+      const session = await zeroDevWallet.getSession()
       if (session && scheduleSessionExpiration) {
         console.log('Auth successful, scheduling session expiration')
         await scheduleSessionExpiration(session)
@@ -27,24 +27,24 @@ export function useZeroDevSignerProvider() {
   }
 
   const getPublicKey = async () => {
-    if (!zeroDevSigner) {
-      throw new Error('ZeroDevSigner SDK not initialized')
+    if (!zeroDevWallet) {
+      throw new Error('ZeroDevWallet SDK not initialized')
     }
-    return await zeroDevSigner.getPublicKey()
+    return await zeroDevWallet.getPublicKey()
   }
 
   const getSession = async () => {
-    if (!zeroDevSigner) {
-      throw new Error('ZeroDevSigner SDK not initialized')
+    if (!zeroDevWallet) {
+      throw new Error('ZeroDevWallet SDK not initialized')
     }
-    return await zeroDevSigner.getSession()
+    return await zeroDevWallet.getSession()
   }
 
   const refreshSession = async (sessionId?: string) => {
-    if (!zeroDevSigner) {
-      throw new Error('ZeroDevSigner SDK not initialized')
+    if (!zeroDevWallet) {
+      throw new Error('ZeroDevWallet SDK not initialized')
     }
-    const newSession = await zeroDevSigner.refreshSession(sessionId)
+    const newSession = await zeroDevWallet.refreshSession(sessionId)
 
     // Re-schedule after manual refresh
     if (newSession && scheduleSessionExpiration) {
@@ -56,19 +56,19 @@ export function useZeroDevSignerProvider() {
   }
 
   const logout = async () => {
-    if (!zeroDevSigner) {
-      throw new Error('ZeroDevSigner SDK not initialized')
+    if (!zeroDevWallet) {
+      throw new Error('ZeroDevWallet SDK not initialized')
     }
     // Clear all timers before logout
     if (clearAllTimers) {
       clearAllTimers()
     }
-    return await zeroDevSigner.logout()
+    return await zeroDevWallet.logout()
   }
 
   const exportWallet = async (iframeContainerId: string) => {
-    if (!zeroDevSigner) {
-      throw new Error('ZeroDevSigner SDK not initialized')
+    if (!zeroDevWallet) {
+      throw new Error('ZeroDevWallet SDK not initialized')
     }
     const iframeContainer = document.getElementById(iframeContainerId)
     if (!iframeContainer) {
@@ -80,7 +80,10 @@ export function useZeroDevSignerProvider() {
       iframeElementId: "export-wallet-iframe",
     })
     const publicKey = await iframeStamper.init()
-    const { exportBundle, organizationId } = await exportWalletSdk({ signer: zeroDevSigner, targetPublicKey: publicKey })
+    console.log('publicKey', publicKey)
+    const { exportBundle, organizationId } = await exportWalletSdk({ wallet: zeroDevWallet, targetPublicKey: publicKey })
+    console.log('exportBundle', exportBundle)
+    console.log('organizationId', organizationId)
 
     // Inject export bundle into iframe
     const success = await iframeStamper.injectWalletExportBundle(exportBundle, organizationId);
@@ -90,21 +93,21 @@ export function useZeroDevSignerProvider() {
   }
 
   const toAccount = async () => {
-    if (!zeroDevSigner) {
-      throw new Error('ZeroDevSigner SDK not initialized')
+    if (!zeroDevWallet) {
+      throw new Error('ZeroDevWallet SDK not initialized')
     }
-    return await zeroDevSigner.toAccount()
+    return await zeroDevWallet.toAccount()
   }
 
   return {
     // Raw SDK instance (for advanced usage)
-    zeroDevSigner,
+    zeroDevWallet,
     exportWallet,
 
     // State
     isLoading,
     error,
-    isReady: !isLoading && !error && !!zeroDevSigner,
+    isReady: !isLoading && !error && !!zeroDevWallet,
     sessionExpiring,
     timeRemaining,
 
@@ -118,4 +121,4 @@ export function useZeroDevSignerProvider() {
   }
 }
 
-export type UseZeroDevSignerProviderReturn = ReturnType<typeof useZeroDevSignerProvider>
+export type UseZeroDevWalletProviderReturn = ReturnType<typeof useZeroDevWalletProvider>

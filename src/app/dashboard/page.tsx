@@ -19,7 +19,7 @@ import { SigningTest } from "../components/SigningTest";
 import { SendTransactionTest } from "../components/SendTransactionTest";
 import { SessionExpiryWarning } from "../components/SessionExpiryWarning";
 import { ExportWalletModal } from "../components/ExportWalletModal";
-import { useZeroDevSignerProvider } from "../hooks/useZeroDevSignerProvider";
+import { useZeroDevWalletProvider } from "../hooks/useZeroDevWalletProvider";
 
 type ActiveTab = "signing" | "transaction";
 
@@ -36,7 +36,7 @@ export default function DashboardPage() {
   const [copied, setCopied] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
 
-  const { getSession, toAccount, logout, isReady } = useZeroDevSignerProvider();
+  const { getSession, toAccount, logout, isReady } = useZeroDevWalletProvider();
 
   useEffect(() => {
     const loadSession = async () => {

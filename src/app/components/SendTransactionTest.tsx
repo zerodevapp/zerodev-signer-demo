@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Send, Sparkles, AlertCircle, Loader2, Check, ExternalLink, RefreshCw } from "lucide-react";
 import { cn } from "../lib/utils";
-import { useZeroDevSignerProvider } from "../hooks/useZeroDevSignerProvider";
+import { useZeroDevWalletProvider } from "../hooks/useZeroDevWalletProvider";
 import {
   type Address,
   createWalletClient,
@@ -38,7 +38,7 @@ export function SendTransactionTest() {
   const [loadingBalance, setLoadingBalance] = useState(false);
   const [isGasless, setIsGasless] = useState(false);
 
-  const { isReady, toAccount } = useZeroDevSignerProvider();
+  const { isReady, toAccount } = useZeroDevWalletProvider();
 
   // Fetch NFT balance
   const fetchNftBalance = async () => {

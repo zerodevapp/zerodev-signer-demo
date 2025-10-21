@@ -1,17 +1,17 @@
 "use client";
 
 import { useEffect, useState, ReactNode } from 'react';
-import { ZeroDevSignerProvider } from './ZeroDevSignerProvider';
-import { ZeroDevSignerConfig } from '@zerodev/signer-core';
+import { ZeroDevWalletProvider } from './ZeroDevWalletProvider';
+import { ZeroDevWalletConfig } from '@zerodev/wallet-core';
 
-interface LayoutZeroDevSignerProviderProps {
+interface LayoutZeroDevWalletProviderProps {
   children: ReactNode;
 }
 
 const organizationId = process.env.NEXT_PUBLIC_TURNKEY_ORGANIZATION_ID
 
-export function LayoutZeroDevSignerProvider({ children }: LayoutZeroDevSignerProviderProps) {
-  const [config, setConfig] = useState<ZeroDevSignerConfig | null>(null);
+export function LayoutZeroDevWalletProvider({ children }: LayoutZeroDevWalletProviderProps) {
+  const [config, setConfig] = useState<ZeroDevWalletConfig | null>(null);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -29,12 +29,12 @@ export function LayoutZeroDevSignerProvider({ children }: LayoutZeroDevSignerPro
     }
   }, []);
 
-  // If we have config, wrap with ZeroDevSignerProvider
+  // If we have config, wrap with ZeroDevWalletProvider
   if (config) {
     return (
-      <ZeroDevSignerProvider config={config}>
+      <ZeroDevWalletProvider config={config}>
         {children}
-      </ZeroDevSignerProvider>
+      </ZeroDevWalletProvider>
     );
   }
 

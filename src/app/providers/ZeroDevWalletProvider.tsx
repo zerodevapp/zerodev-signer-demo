@@ -9,12 +9,12 @@ import React, {
   ReactNode,
 } from "react";
 import {
-  createZeroDevSigner,
-  type ZeroDevSignerSDK,
-  type ZeroDevSignerConfig,
-  type ZeroDevSignerSession,
+  createZeroDevWallet,
+  type ZeroDevWalletSDK,
+  type ZeroDevWalletConfig,
+  type ZeroDevWalletSession,
   normalizeTimestamp,
-} from "@zerodev/signer-core";
+} from "@zerodev/wallet-core";
 import {
   type TimerMap,
   clearAll,
@@ -28,18 +28,18 @@ import {
 const SESSION_WARNING_THRESHOLD_MS = 60 * 1000; // Very high for testing - fires ~10s after auth
 const AUTO_REFRESH_ENABLED = true; // Hardcoded for now, will be config later
 
-interface ZeroDevSignerContextType {
-  zeroDevSigner: ZeroDevSignerSDK | null;
+interface ZeroDevWalletContextType {
+  zeroDevWallet: ZeroDevWalletSDK | null;
   isLoading: boolean;
   error: string | null;
   sessionExpiring: boolean;
   timeRemaining: number;
-  scheduleSessionExpiration: ((session: ZeroDevSignerSession) => Promise<void>) | null;
+  scheduleSessionExpiration: ((session: ZeroDevWalletSession) => Promise<void>) | null;
   clearAllTimers: (() => void) | null;
 }
 
-const ZeroDevSignerContext = createContext<ZeroDevSignerContextType>({
-  zeroDevSigner: null,
+const ZeroDevWalletContext = createContext<ZeroDevWalletContextType>({
+  zeroDevWallet: null,
   isLoading: false,
   error: null,
   sessionExpiring: false,
@@ -48,14 +48,14 @@ const ZeroDevSignerContext = createContext<ZeroDevSignerContextType>({
   clearAllTimers: null,
 });
 
-interface ZeroDevSignerProviderProps {
+interface ZeroDevWalletProviderProps {
   children: ReactNode;
-  config: Omit<ZeroDevSignerConfig, "iframeContainer">; // We'll handle iframe container internally
+  config: Omit<ZeroDevWalletConfig, "iframeContainer">; // We'll handle iframe container internally
 }
 
-export function ZeroDevSignerProvider({ children, config }: ZeroDevSignerProviderProps) {
+export function ZeroDevWalletProvider({ children, config }: ZeroDevWalletProviderProps) {
   const initRef = useRef<boolean>(false);
-  const [zeroDevSigner, setZeroDevSigner] = useState<ZeroDevSignerSDK | null>(null);
+  const [zeroDevWallet, setZeroDevWallet] = useState<ZeroDevWalletSDK | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sessionExpiring, setSessionExpiring] = useState(false);
@@ -65,10 +65,10 @@ export function ZeroDevSignerProvider({ children, config }: ZeroDevSignerProvide
   const expiryTimersRef = useRef<TimerMap>({});
 
   // Schedule session expiration timers
-  const scheduleSessionExpirationRef = useRef<((session: ZeroDevSignerSession) => Promise<void>) | null>(null);
+  const scheduleSessionExpirationRef = useRef<((session: ZeroDevWalletSession) => Promise<void>) | null>(null);
 
   // Internal function that takes sdk directly (avoids race condition)
-  const scheduleSessionExpirationForSdk = async (sdk: ZeroDevSignerSDK, session: ZeroDevSignerSession) => {
+  const scheduleSessionExpirationForSdk = async (sdk: ZeroDevWalletSDK, session: ZeroDevWalletSession) => {
     console.log("scheduleSessionExpiration", session);
 
     if (!sdk) {
@@ -163,13 +163,13 @@ export function ZeroDevSignerProvider({ children, config }: ZeroDevSignerProvide
     );
   };
 
-  // Wrapper that uses current zeroDevSigner state
-  const scheduleSessionExpiration = async (session: ZeroDevSignerSession) => {
-    if (!zeroDevSigner) {
-      console.error("Cannot schedule - zeroDevSigner not initialized");
+  // Wrapper that uses current zeroDevWallet state
+  const scheduleSessionExpiration = async (session: ZeroDevWalletSession) => {
+    if (!zeroDevWallet) {
+      console.error("Cannot schedule - zeroDevWallet not initialized");
       return;
     }
-    return scheduleSessionExpirationForSdk(zeroDevSigner, session);
+    return scheduleSessionExpirationForSdk(zeroDevWallet, session);
   };
 
   // Clear all timers function
@@ -188,7 +188,7 @@ export function ZeroDevSignerProvider({ children, config }: ZeroDevSignerProvide
     if (initRef.current) return;
     initRef.current = true;
 
-    async function initializeZeroDevSigner() {
+    async function initializeZeroDevWallet() {
       try {
         setIsLoading(true);
         setError(null);
@@ -200,14 +200,14 @@ export function ZeroDevSignerProvider({ children, config }: ZeroDevSignerProvide
         //   throw new Error(`Iframe container not found`);
         // }
 
-        console.log("Creating new ZeroDevSigner SDK instance");
-        const sdk = await createZeroDevSigner({
+        console.log("Creating new ZeroDevWallet SDK instance");
+        const sdk = await createZeroDevWallet({
           ...config,
         });
 
-        setZeroDevSigner(sdk);
+        setZeroDevWallet(sdk);
 
-        // Wait for next tick so zeroDevSigner state is set
+        // Wait for next tick so zeroDevWallet state is set
         await new Promise(resolve => setTimeout(resolve, 0));
 
         // Check for existing session and schedule expiration
@@ -215,7 +215,7 @@ export function ZeroDevSignerProvider({ children, config }: ZeroDevSignerProvide
           const existingSession = await sdk.getSession();
           if (existingSession) {
             console.log('Found existing session, scheduling expiration');
-            // Call the function directly with sdk, not using zeroDevSigner state
+            // Call the function directly with sdk, not using zeroDevWallet state
             scheduleSessionExpirationForSdk(sdk, existingSession);
           }
         } catch (err) {
@@ -228,7 +228,7 @@ export function ZeroDevSignerProvider({ children, config }: ZeroDevSignerProvide
       }
     }
 
-    initializeZeroDevSigner();
+    initializeZeroDevWallet();
 
     // Cleanup timers on unmount
     return () => {
@@ -240,8 +240,8 @@ export function ZeroDevSignerProvider({ children, config }: ZeroDevSignerProvide
 
 
   return (
-    <ZeroDevSignerContext.Provider value={{
-      zeroDevSigner,
+    <ZeroDevWalletContext.Provider value={{
+      zeroDevWallet,
       isLoading,
       error,
       sessionExpiring,
@@ -250,13 +250,13 @@ export function ZeroDevSignerProvider({ children, config }: ZeroDevSignerProvide
       clearAllTimers: clearAllTimersFunc
     }}>
       {children}
-    </ZeroDevSignerContext.Provider>
+    </ZeroDevWalletContext.Provider>
   );
 }
 
 // Export helper to schedule session expiration (for use after auth)
 export function useScheduleSessionExpiration() {
-  const { sessionExpiring, timeRemaining } = useZeroDevSignerContext();
+  const { sessionExpiring, timeRemaining } = useZeroDevWalletContext();
 
   return {
     sessionExpiring,
@@ -264,11 +264,11 @@ export function useScheduleSessionExpiration() {
   };
 }
 
-export const useZeroDevSignerContext = () => {
-  const context = useContext(ZeroDevSignerContext);
+export const useZeroDevWalletContext = () => {
+  const context = useContext(ZeroDevWalletContext);
 
   if (context === undefined) {
-    throw new Error("useZeroDevSignerContext must be used within a ZeroDevSignerProvider");
+    throw new Error("useZeroDevWalletContext must be used within a ZeroDevWalletProvider");
   }
 
   return context;

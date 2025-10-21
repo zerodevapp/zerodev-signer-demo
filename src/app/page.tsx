@@ -6,7 +6,7 @@ import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
 import { Mail, KeyRound, Loader2, Info } from "lucide-react";
 import { sha256, type Hex } from "viem";
 import { cn } from "./lib/utils";
-import { useZeroDevSignerProvider } from "./hooks/useZeroDevSignerProvider";
+import { useZeroDevWalletProvider } from "./hooks/useZeroDevWalletProvider";
 
 type OTPStep = 'send' | 'verify';
 
@@ -27,7 +27,7 @@ export default function LandingPage() {
   // OAuth state
   const [nonce, setNonce] = useState<string>("");
 
-  const { isReady, auth, getPublicKey } = useZeroDevSignerProvider();
+  const { isReady, auth, getPublicKey } = useZeroDevWalletProvider();
 
   // Generate nonce for OAuth
   useEffect(() => {

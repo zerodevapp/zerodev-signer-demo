@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { FileSignature, Check, AlertCircle, Loader2, Sparkles } from "lucide-react";
 import { cn } from "../lib/utils";
-import { useZeroDevSignerProvider } from "../hooks/useZeroDevSignerProvider";
+import { useZeroDevWalletProvider } from "../hooks/useZeroDevWalletProvider";
 import {
   type Hex,
   verifyMessage,
@@ -61,7 +61,7 @@ export function SigningTest() {
   const [verificationResult, setVerificationResult] = useState<VerificationResult | null>(null);
   const [error, setError] = useState<string>("");
 
-  const { isReady, toAccount } = useZeroDevSignerProvider();
+  const { isReady, toAccount } = useZeroDevWalletProvider();
 
   const handleSign = async () => {
     if (!isReady) {

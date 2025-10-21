@@ -2,11 +2,11 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useZeroDevSignerProvider } from '../hooks/useZeroDevSignerProvider';
+import { useZeroDevWalletProvider } from '../hooks/useZeroDevWalletProvider';
 
 function VerifyContent() {
   const searchParams = useSearchParams();
-  const { isLoading, error: sdkError, isReady, auth } = useZeroDevSignerProvider();
+  const { isLoading, error: sdkError, isReady, auth } = useZeroDevWalletProvider();
   const [verificationState, setVerificationState] = useState<'loading' | 'success' | 'error'>('loading');
   const [errorMessage, setErrorMessage] = useState<string>('');
 

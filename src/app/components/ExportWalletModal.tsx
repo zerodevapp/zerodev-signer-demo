@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Download, X, AlertTriangle, Loader2 } from "lucide-react";
 import { cn } from "../lib/utils";
-import { useZeroDevSignerProvider } from "../hooks/useZeroDevSignerProvider";
+import { useZeroDevWalletProvider } from "../hooks/useZeroDevWalletProvider";
 
 interface ExportWalletModalProps {
   isOpen: boolean;
@@ -17,7 +17,7 @@ export function ExportWalletModal({ isOpen, onClose }: ExportWalletModalProps) {
   const [showWarning, setShowWarning] = useState(true);
   const [exporting, setExporting] = useState(false);
 
-  const { exportWallet } = useZeroDevSignerProvider();
+  const { exportWallet } = useZeroDevWalletProvider();
 
   const handleExport = async () => {
     setLoading(true);
