@@ -24,7 +24,7 @@ export function LayoutZeroDevWalletProvider({ children }: LayoutZeroDevWalletPro
         // iframeElementId: "turnkey-auth-iframe-element-id",
         // iframeUrl: "https://auth.turnkey.com",
         organizationId,
-        proxyBaseUrl: process.env.NEXT_PUBLIC_KMS_PROXY_BASE_URL || "http://localhost:7082",
+        proxyBaseUrl: process.env.NEXT_PUBLIC_KMS_PROXY_BASE_URL,
       });
     }
   }, []);
