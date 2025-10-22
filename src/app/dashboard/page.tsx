@@ -160,7 +160,7 @@ export default function DashboardPage() {
                     strokeLinejoin="round"
                   />
                 </svg>
-                <span className="text-lg font-semibold text-gray-900">ZeroDev Signer</span>
+                <span className="text-lg font-semibold text-gray-900">ZeroDev Wallet</span>
                 <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full font-medium">
                   Demo
                 </span>

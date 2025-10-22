@@ -1,4 +1,4 @@
-# ZeroDev Signer Demo
+# ZeroDev Wallet Demo
 
 ## Prerequisites
 

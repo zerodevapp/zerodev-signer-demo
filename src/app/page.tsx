@@ -231,7 +231,7 @@ export default function LandingPage() {
               </span>
             </div>
             <div>
-              <h1 className="text-2xl font-semibold tracking-tight text-gray-900">ZeroDev Signer</h1>
+              <h1 className="text-2xl font-semibold tracking-tight text-gray-900">ZeroDev Wallet</h1>
               <p className="text-sm text-gray-500 mt-2 font-medium">Log in or sign up</p>
             </div>
           </div>
