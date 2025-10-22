@@ -20,7 +20,6 @@ pnpm install
 1. Copy the environment example file:
 
 ```bash
-cd packages/doorway
 cp .env.example .env
 ```
 
@@ -37,7 +36,6 @@ NEXT_PUBLIC_GOOGLE_CLIENT_ID=
 1. Start the development server:
 
 ```bash
-cd packages/doorway
 pnpm run dev
 ```
 
