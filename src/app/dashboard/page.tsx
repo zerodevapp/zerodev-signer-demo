@@ -4,6 +4,9 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createPublicClient, http, formatEther, Address, isAddress } from "viem";
 import { sepolia } from "viem/chains";
+import { useAccount } from "wagmi";
+
+export const dynamic = 'force-dynamic';
 import {
   FileSignature,
   Send,
@@ -19,7 +22,7 @@ import { SigningTest } from "../components/SigningTest";
 import { SendTransactionTest } from "../components/SendTransactionTest";
 import { SessionExpiryWarning } from "../components/SessionExpiryWarning";
 import { ExportWalletModal } from "../components/ExportWalletModal";
-import { useZeroDevWalletProvider } from "../hooks/useZeroDevWalletProvider";
+import { useLogout } from "@zerodev/wallet-react";
 
 type ActiveTab = "signing" | "transaction";
 
@@ -31,56 +34,42 @@ const tabs = [
 export default function DashboardPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<ActiveTab>("signing");
-  const [walletAddress, setWalletAddress] = useState<string>("");
   const [balance, setBalance] = useState<string>("0");
   const [copied, setCopied] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
 
-  const { getSession, toAccount, logout, isReady } = useZeroDevWalletProvider();
+  // Wagmi hooks
+  const { address, isConnected, status,isReconnecting, isConnecting } = useAccount();
+  const logout = useLogout();
 
-  useEffect(() => {
-    const loadSession = async () => {
-      // Wait for SDK to be ready first
-      if (!isReady) {
-        console.log("Dashboard: SDK not ready yet, waiting...");
-        return;
-      }
+  // useEffect(() => {
+  //   // Redirect to login if disconnected (but not while reconnecting)
+  //   console.log("Dashboard: status:", status);
+  //   console.log("Dashboard: isReconnecting:", isReconnecting);
+  //   console.log("Dashboard: isConnecting:", isConnecting);
+  //   if (isReconnecting || isConnecting) {
+  //     return;
+  //   }
+  //   if (status === 'disconnected') {
+  //     console.log("Dashboard: No session found, redirecting to login");
+  //     router.push("/");
+  //     return;
+  //   }
 
-      try {
-        console.log("Dashboard: SDK ready, loading session...");
-        const session = await getSession();
-        console.log("Dashboard: Session result:", session);
-
-        if (!session) {
-          console.log("Dashboard: No session found, redirecting to login");
-          setTimeout(() => router.push("/"), 100);
-          return;
-        }
-
-        console.log("Dashboard: Session found, loading account...");
-
-        // Get wallet address from account
-        const account = await toAccount();
-        console.log("Dashboard: Account loaded:", account.address);
-        setWalletAddress(account.address);
-      } catch (err) {
-        console.error("Dashboard: Failed to load session/account:", err);
-        setTimeout(() => router.push("/"), 100);
-      }
-    };
-    loadSession();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isReady, getSession, toAccount, router]);
+  //   if (status === 'connected' && address) {
+  //     console.log("Dashboard: Authenticated with address:", address);
+  //   }
+  // }, [status, address, router]);
 
   useEffect(() => {
     const loadBalance = async () => {
-      if (walletAddress && isAddress(walletAddress)) {
+      if (address && isAddress(address)) {
         try {
           const publicClient = createPublicClient({
             chain: sepolia,
             transport: http(process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL),
           });
-          const balanceWei = await publicClient.getBalance({ address: walletAddress as Address });
+          const balanceWei = await publicClient.getBalance({ address: address as Address });
           setBalance(formatEther(balanceWei));
         } catch (err) {
           console.error("Dashboard: Failed to load balance:", err);
@@ -89,17 +78,17 @@ export default function DashboardPage() {
       }
     };
     loadBalance();
-  }, [walletAddress]);
+  }, [address]);
 
   const handleCopy = async () => {
-    if (!walletAddress) return;
-    await navigator.clipboard.writeText(walletAddress);
+    if (!address) return;
+    await navigator.clipboard.writeText(address);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   const handleLogout = async () => {
-    await logout();
+    await logout.mutateAsync({});
     router.push("/");
   };
 
@@ -108,13 +97,14 @@ export default function DashboardPage() {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
-  if (!isReady || !walletAddress) {
+  // Show loading while connecting or reconnecting
+  if (status === 'connecting' || status === 'reconnecting' || !address) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="flex items-center gap-2">
           <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
           <span className="text-sm text-gray-600">
-            {!isReady ? "Initializing SDK..." : "Loading wallet..."}
+            {status === 'reconnecting' ? 'Reconnecting...' : 'Loading wallet...'}
           </span>
         </div>
       </div>
@@ -170,7 +160,7 @@ export default function DashboardPage() {
               <div className="flex items-center gap-3">
                 <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-200 group cursor-pointer">
                   <Wallet className="h-4 w-4 text-gray-500" />
-                  <span className="text-sm font-mono text-gray-700">{formatAddress(walletAddress)}</span>
+                  <span className="text-sm font-mono text-gray-700">{formatAddress(address)}</span>
                   <button
                     onClick={handleCopy}
                     className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -217,7 +207,7 @@ export default function DashboardPage() {
               </button>
             </div>
             <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
-              <span className="font-mono text-xs sm:text-sm break-all">{walletAddress}</span>
+              <span className="font-mono text-xs sm:text-sm break-all">{address}</span>
               <button
                 onClick={handleCopy}
                 className="text-gray-400 hover:text-gray-600 flex-shrink-0"

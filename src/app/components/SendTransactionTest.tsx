@@ -3,21 +3,17 @@
 import { useState, useEffect } from "react";
 import { Send, Sparkles, AlertCircle, Loader2, Check, ExternalLink, RefreshCw } from "lucide-react";
 import { cn } from "../lib/utils";
-import { useZeroDevWalletProvider } from "../hooks/useZeroDevWalletProvider";
 import {
   type Address,
-  createWalletClient,
   createPublicClient,
-  type Hex,
   http,
   parseEther,
   parseAbi,
-  encodeFunctionData,
   zeroAddress,
   isAddress,
 } from "viem";
 import { sepolia } from "viem/chains";
-import { sendGaslessTransaction } from "../services/gaslessTransaction";
+import { useAccount, useSendTransaction, useWriteContract } from "wagmi";
 
 type TransactionMode = "send-eth" | "mint-nft";
 
@@ -31,22 +27,24 @@ export function SendTransactionTest() {
   const [mode, setMode] = useState<TransactionMode>("mint-nft");
   const [recipient, setRecipient] = useState<string>(zeroAddress);
   const [amount, setAmount] = useState<string>("0");
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string>("");
   const [nftBalance, setNftBalance] = useState<string>("0");
   const [loadingBalance, setLoadingBalance] = useState(false);
-  const [isGasless, setIsGasless] = useState(false);
 
-  const { isReady, toAccount } = useZeroDevWalletProvider();
+  // Wagmi hooks
+  const { address, isConnected } = useAccount();
+  const { sendTransaction, isPending: isSendingTx, data: sendTxHash } = useSendTransaction();
+  const { writeContract, isPending: isMinting, data: mintTxHash,error: mintError } = useWriteContract();
+
+  const loading = isSendingTx || isMinting;
+  const result = sendTxHash || mintTxHash;
 
   // Fetch NFT balance
   const fetchNftBalance = async () => {
-    if (!isReady) return;
+    if (!isConnected || !address) return;
 
     setLoadingBalance(true);
     try {
-      const account = await toAccount();
       const publicClient = createPublicClient({
         chain: sepolia,
         transport: http(process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL),
@@ -56,7 +54,7 @@ export function SendTransactionTest() {
         address: NFT_CONTRACT_ADDRESS,
         abi: NFT_CONTRACT_ABI,
         functionName: "balanceOf",
-        args: [account.address],
+        args: [address],
       });
 
       setNftBalance(balance.toString());
@@ -69,119 +67,73 @@ export function SendTransactionTest() {
 
   // Fetch balance when switching to NFT mode
   useEffect(() => {
-    if (mode === "mint-nft" && isReady) {
+    if (mode === "mint-nft" && isConnected) {
       fetchNftBalance();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode, isReady]);
+  }, [mode, isConnected]);
 
   const handleSendEth = async () => {
-    if (!isReady || !recipient) {
+    if (!isConnected || !address || !recipient) {
       setError("Please authenticate and enter recipient address");
       return;
     }
 
-    setLoading(true);
     setError("");
-    setResult(null);
 
     if (!isAddress(recipient)) {
       setError("Invalid recipient address");
-      setLoading(false);
       return;
     }
     if (isNaN(Number(amount)) || Number(amount) <= 0) {
       setError("Invalid amount");
-      setLoading(false);
       return;
     }
 
     try {
-      if (isGasless) {
-        const result = await sendGaslessTransaction({
-          localAccount: await toAccount(),
-          to: recipient as Address,
-          data: "0x" as Hex,
-          value: parseEther(amount || "0"),
-        });
-        setResult(`https://sepolia.etherscan.io/tx/${result.transactionHash}`);
-      } else {
-        const walletClient = createWalletClient({
-          transport: http(process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL),
-          chain: sepolia,
-          account: await toAccount(),
-        });
-        const hash = await walletClient.sendTransaction({
-          to: recipient as Address,
-          value: parseEther(amount || "0"),
-        });
-        setResult(`https://sepolia.etherscan.io/tx/${hash}`);
-      }
+      // Use Wagmi's useSendTransaction - provider handles gasless via EIP-7702
+      sendTransaction({
+        to: recipient as Address,
+        value: parseEther(amount || "0"),
+      });
     } catch (err) {
       console.error("Transaction error:", err);
       setError("Transaction failed");
-      setLoading(false);
-    } finally {
-      setLoading(false);
     }
   };
 
   const handleMintNft = async () => {
-    if (!isReady) {
+    console.log("handleMintNft", isConnected, address);
+    if (!isConnected || !address) {
       setError("Please authenticate first");
       return;
     }
 
-    setLoading(true);
     setError("");
-    setResult(null);
 
     try {
-      const account = await toAccount();
-
-      // Encode mint function data - mint to self
-      const data = encodeFunctionData({
+      // Use Wagmi's useWriteContract - provider handles gasless via EIP-7702
+      await writeContract({
+        address: NFT_CONTRACT_ADDRESS,
         abi: NFT_CONTRACT_ABI,
         functionName: "mint",
-        args: [account.address],
+        args: [address],
       });
-
-      if (isGasless) {
-        // Use gasless for NFT mint
-        const result = await sendGaslessTransaction({
-          localAccount: account,
-          to: NFT_CONTRACT_ADDRESS as Address,
-          data: data,
-          value: parseEther("0"),
-        });
-        setResult(`https://sepolia.etherscan.io/tx/${result.transactionHash}`);
-      } else {
-        // Regular transaction
-        const walletClient = createWalletClient({
-          transport: http(process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL),
-          chain: sepolia,
-          account: account,
-        });
-
-        const hash = await walletClient.writeContract({
-          address: NFT_CONTRACT_ADDRESS,
-          abi: NFT_CONTRACT_ABI,
-          functionName: "mint",
-          args: [account.address],
-        });
-
-        setResult(`https://sepolia.etherscan.io/tx/${hash}`);
-      }
 
       // Refresh NFT balance after successful mint
       setTimeout(() => fetchNftBalance(), 3000);
     } catch (err) {
       console.error("Mint error:", err);
       setError("Mint failed");
-    } finally {
-      setLoading(false);
     }
   };
+
+  // Watch for transaction success
+  useEffect(() => {
+    if (sendTxHash || mintTxHash) {
+      setError("");
+    }
+  }, [sendTxHash, mintTxHash]);
 
   return (
     <div className="space-y-6">
@@ -195,7 +147,7 @@ export function SendTransactionTest() {
       {/* Mode Selector */}
       <div className="flex gap-2 p-1 bg-gray-100 rounded-lg">
         <button
-          onClick={() => { setMode("mint-nft"); setResult(null); setError(""); }}
+          onClick={() => { setMode("mint-nft"); setError(""); }}
           className={cn(
             "flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all",
             mode === "mint-nft" ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900"
@@ -204,7 +156,7 @@ export function SendTransactionTest() {
           Mint NFT
         </button>
         <button
-          onClick={() => { setMode("send-eth"); setResult(null); setError(""); }}
+          onClick={() => { setMode("send-eth"); setError(""); }}
           className={cn(
             "flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all",
             mode === "send-eth" ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900"
@@ -232,19 +184,12 @@ export function SendTransactionTest() {
         </div>
       )}
 
-      {/* Gasless Toggle */}
-      <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-        <input
-          type="checkbox"
-          id="gasless"
-          checked={isGasless}
-          onChange={(e) => setIsGasless(e.target.checked)}
-          className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-        />
-        <label htmlFor="gasless" className="text-sm font-medium text-gray-700 flex items-center gap-2">
-          <Sparkles className="h-4 w-4 text-yellow-500" />
-          Use EIP-7702 (Gasless)
-        </label>
+      {/* Gasless Info */}
+      <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+        <Sparkles className="h-4 w-4 text-blue-600" />
+        <p className="text-sm font-medium text-blue-700">
+          All transactions are gasless via EIP-7702
+        </p>
       </div>
 
       {/* Form */}
@@ -309,12 +254,12 @@ export function SendTransactionTest() {
             {mode === "send-eth" ? (
               <>
                 <Send className="h-4 w-4" />
-                Send {isGasless ? "Gasless " : ""}ETH
+                Send Gasless ETH
               </>
             ) : (
               <>
                 <Sparkles className="h-4 w-4" />
-                Mint {isGasless ? "Gasless " : ""}NFT
+                Mint Gasless NFT
               </>
             )}
           </>
@@ -322,12 +267,12 @@ export function SendTransactionTest() {
       </button>
 
       {/* Error */}
-      {error && (
+      {(error || mintError) && (
         <div className="flex items-start gap-2 px-4 py-3 bg-red-50 border border-red-100 rounded-lg">
           <AlertCircle className="h-4 w-4 text-red-600 mt-0.5" />
           <div>
             <p className="text-sm font-medium text-red-900">Transaction Failed</p>
-            <p className="text-sm text-red-700 mt-0.5">{error}</p>
+            <p className="text-sm text-red-700 mt-0.5">{error || mintError?.message}</p>
           </div>
         </div>
       )}
@@ -342,7 +287,7 @@ export function SendTransactionTest() {
             </span>
           </div>
           <a
-            href={result}
+            href={`https://sepolia.etherscan.io/tx/${result}`}
             target="_blank"
             rel="noopener noreferrer"
             className={cn(

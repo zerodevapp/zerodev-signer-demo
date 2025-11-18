@@ -1,12 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
-import { Mail, KeyRound, Loader2, Info } from "lucide-react";
-import { sha256, type Hex } from "viem";
+import { Mail, KeyRound, Loader2 } from "lucide-react";
 import { cn } from "./lib/utils";
-import { useZeroDevWalletProvider } from "./hooks/useZeroDevWalletProvider";
+import {
+  useRegisterPasskey,
+  useLoginPasskey,
+  useAuthenticateOAuth,
+  useSendOTP,
+  useVerifyOTP,
+  OAUTH_PROVIDERS,
+} from "@zerodev/wallet-react";
+
+export const dynamic = 'force-dynamic';
 
 type OTPStep = 'send' | 'verify';
 
@@ -19,36 +26,13 @@ export default function LandingPage() {
   // OTP specific state
   const [otpStep, setOtpStep] = useState<OTPStep>('send');
   const [otpCode, setOtpCode] = useState("");
-  const [otpData, setOtpData] = useState<{
-    otpId: string;
-    subOrganizationId: string;
-  } | null>(null);
+  const [otpData, setOtpData] = useState<{ otpId: string; subOrganizationId: string } | null>(null);
 
-  // OAuth state
-  const [nonce, setNonce] = useState<string>("");
-
-  const { isReady, auth, getPublicKey } = useZeroDevWalletProvider();
-
-  // Generate nonce for OAuth
-  useEffect(() => {
-    const generateNonce = async () => {
-      if (isReady) {
-        try {
-          const compressedPublicKey = await getPublicKey();
-          console.log("compressedPublicKey", compressedPublicKey);
-          const nonceHash = sha256(compressedPublicKey as Hex);
-          setNonce(nonceHash.replace(/^0x/, ""));
-        } catch (err) {
-          console.error("Failed to generate nonce:", err);
-        }
-      }
-    };
-    generateNonce();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isReady]);
-
-  // Optional: Add a "Continue to Dashboard" button if already logged in
-  // But don't auto-redirect - let user see the login page
+  const registerPasskey = useRegisterPasskey();
+  const loginPasskey = useLoginPasskey();
+  const authenticateOAuth = useAuthenticateOAuth();
+  const sendOTP = useSendOTP();
+  const verifyOTP = useVerifyOTP();
 
   const handlePasskeyRegister = async () => {
     if (!email.trim()) return;
@@ -56,11 +40,7 @@ export default function LandingPage() {
     setError("");
 
     try {
-      await auth({
-        type: "passkey",
-        email,
-        mode: "register",
-      });
+      await registerPasskey.mutateAsync({ email });
       router.push("/dashboard");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Passkey registration failed");
@@ -75,11 +55,7 @@ export default function LandingPage() {
     setError("");
 
     try {
-      await auth({
-        type: "passkey",
-        email,
-        mode: "login",
-      });
+      await loginPasskey.mutateAsync({ email });
       router.push("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Passkey login failed");
@@ -94,14 +70,11 @@ export default function LandingPage() {
     setError("");
 
     try {
-      const data = await auth({
-        type: "otp",
-        mode: "sendOtp",
-        email: email,
-        contact: { type: "email", contact: email },
+      const data = await sendOTP.mutateAsync({
+        email,
         emailCustomization: {
           magicLinkTemplate: `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/verify?otp=%s`
-        },
+        }
       });
       console.log("data", data);
       localStorage.setItem("otpId", data.otpId);
@@ -120,16 +93,8 @@ export default function LandingPage() {
     setError("");
 
     try {
-      const data = await auth({
-        type: "otp",
-        mode: "sendOtp",
-        email,
-        contact: { type: "email", contact: email },
-      });
-      setOtpData({
-        otpId: data.otpId,
-        subOrganizationId: data.subOrganizationId
-      });
+      const data = await sendOTP.mutateAsync({ email });
+      setOtpData(data);
       setOtpStep('verify');
       setError("OTP code sent to your email");
     } catch (err) {
@@ -145,12 +110,10 @@ export default function LandingPage() {
     setError("");
 
     try {
-      await auth({
-        type: "otp",
-        mode: "verifyOtp",
+      await verifyOTP.mutateAsync({
+        code: otpCode,
         otpId: otpData.otpId,
-        otpCode: otpCode,
-        subOrganizationId: otpData.subOrganizationId
+        subOrganizationId: otpData.subOrganizationId,
       });
       router.push("/dashboard");
     } catch (err) {
@@ -163,25 +126,15 @@ export default function LandingPage() {
   const resetOTP = () => {
     setOtpStep('send');
     setOtpCode("");
-    setOtpData(null);
     setError("");
   };
 
-  const handleOAuthSuccess = async (credentialResponse: CredentialResponse) => {
-    if (!credentialResponse.credential) {
-      setError("No credential received from Google");
-      return;
-    }
-
+  const handleGoogleOAuth = async () => {
     setLoadingAction("oauth");
     setError("");
 
     try {
-      await auth({
-        type: "oauth",
-        credential: credentialResponse.credential,
-        provider: "google",
-      });
+      await authenticateOAuth.mutateAsync({ provider: OAUTH_PROVIDERS.GOOGLE });
       router.push("/dashboard");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "OAuth authentication failed");
@@ -246,7 +199,7 @@ export default function LandingPage() {
                   placeholder="Enter your email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  disabled={!isReady || loadingAction !== null}
+                  disabled={loadingAction !== null}
                   className={cn(
                     "w-full px-4 py-3 rounded-lg border border-gray-200",
                     "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
@@ -292,7 +245,7 @@ export default function LandingPage() {
                 {/* Passkey Register */}
                 <button
                   onClick={handlePasskeyRegister}
-                  disabled={!email.trim() || !isReady || loadingAction !== null}
+                  disabled={!email.trim() || loadingAction !== null}
                   className={cn(
                     "w-full py-3 px-4 rounded-lg font-medium text-sm transition-all duration-200",
                     "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50",
@@ -316,7 +269,7 @@ export default function LandingPage() {
                 {/* Passkey Login */}
                 <button
                   onClick={handlePasskeyLogin}
-                  disabled={!email.trim() || !isReady || loadingAction !== null}
+                  disabled={!email.trim() || loadingAction !== null}
                   className={cn(
                     "w-full py-3 px-4 rounded-lg font-medium text-sm transition-all duration-200",
                     "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50",
@@ -352,7 +305,7 @@ export default function LandingPage() {
                 {/* Email Magic Link */}
                 <button
                   onClick={handleEmailAuth}
-                  disabled={!email.trim() || !isReady || loadingAction !== null}
+                  disabled={!email.trim() || loadingAction !== null}
                   className={cn(
                     "w-full py-3 px-4 rounded-lg font-medium text-sm transition-all duration-200",
                     "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50",
@@ -376,7 +329,7 @@ export default function LandingPage() {
                 {/* Email OTP */}
                 <button
                   onClick={handleOTPSend}
-                  disabled={!email.trim() || !isReady || loadingAction !== null}
+                  disabled={!email.trim() || loadingAction !== null}
                   className={cn(
                     "w-full py-3 px-4 rounded-lg font-medium text-sm transition-all duration-200",
                     "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50",
@@ -438,19 +391,34 @@ export default function LandingPage() {
             )}
 
             {/* OAuth - Only show if not in OTP verify */}
-            {otpStep === 'send' && nonce && (
-              <div className="flex justify-center">
-                <GoogleLogin
-                  onSuccess={handleOAuthSuccess}
-                  onError={() => setError("Google OAuth failed")}
-                  nonce={nonce}
-                  text="signin_with"
-                  shape="rectangular"
-                  theme="outline"
-                  size="large"
-                  width="100%"
-                />
-              </div>
+            {otpStep === 'send' && (
+              <button
+                onClick={handleGoogleOAuth}
+                disabled={loadingAction !== null}
+                className={cn(
+                  "w-full py-3 px-4 rounded-lg font-medium text-sm transition-all duration-200",
+                  "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50",
+                  "disabled:opacity-50 disabled:cursor-not-allowed",
+                  "flex items-center justify-center gap-2"
+                )}
+              >
+                {loadingAction === "oauth" ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Authenticating...
+                  </>
+                ) : (
+                  <>
+                    <svg className="h-4 w-4" viewBox="0 0 24 24">
+                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
+                    Continue with Google
+                  </>
+                )}
+              </button>
             )}
           </div>
 
@@ -466,15 +434,6 @@ export default function LandingPage() {
             </div>
           )}
 
-          {/* SDK Status */}
-          {!isReady && (
-            <div className="mx-8 mb-6 flex items-center gap-2 px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600">
-              <Info className="h-4 w-4 flex-shrink-0" />
-              <span>
-                SDK initializing...
-              </span>
-            </div>
-          )}
         </div>
 
       </div>

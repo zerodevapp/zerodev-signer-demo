@@ -3,28 +3,51 @@
 import { useEffect, useState } from "react";
 import { AlertTriangle, X, RefreshCw } from "lucide-react";
 import { cn } from "../lib/utils";
-import { useScheduleSessionExpiration } from "../providers/ZeroDevWalletProvider";
-import { useZeroDevWalletProvider } from "../hooks/useZeroDevWalletProvider";
+import { useRefreshSession } from "@zerodev/wallet-react";
+import { normalizeTimestamp } from "@zerodev/wallet-core";
 
 export function SessionExpiryWarning() {
-  const { sessionExpiring, timeRemaining } = useScheduleSessionExpiration();
-  const { refreshSession } = useZeroDevWalletProvider();
+  const refreshSession = useRefreshSession();
+
+  // TODO: Need to get isExpiring and expiresAt from somewhere
+  const isExpiring = false;
+  const expiresAt = null;
   const [dismissed, setDismissed] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [timeRemaining, setTimeRemaining] = useState(0);
+
+  // Calculate time remaining
+  useEffect(() => {
+    if (!isExpiring || !expiresAt) {
+      setTimeRemaining(0);
+      return;
+    }
+
+    const updateTimer = () => {
+      const expiryMs = normalizeTimestamp(expiresAt);
+      const remaining = Math.max(0, expiryMs - Date.now());
+      setTimeRemaining(remaining);
+    };
+
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000);
+
+    return () => clearInterval(interval);
+  }, [isExpiring, expiresAt]);
 
   const seconds = Math.floor(timeRemaining / 1000);
 
   useEffect(() => {
     // Reset dismissed state when warning appears
-    if (sessionExpiring) {
+    if (isExpiring) {
       setDismissed(false);
     }
-  }, [sessionExpiring]);
+  }, [isExpiring]);
 
   const handleManualRefresh = async () => {
     setRefreshing(true);
     try {
-      await refreshSession();
+      await refreshSession.mutateAsync({});
       // Auto-refresh will handle the rest
     } catch (err) {
       console.error('Manual refresh failed:', err);
@@ -33,7 +56,7 @@ export function SessionExpiryWarning() {
     }
   };
 
-  if (!sessionExpiring || dismissed) {
+  if (!isExpiring || dismissed) {
     return null;
   }
 

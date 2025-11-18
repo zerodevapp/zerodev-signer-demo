@@ -1,0 +1,7 @@
+packages:
+  - src
+
+minimumReleaseAge: 1440
+
+minimumReleaseAgeExclude:
+  - '@zerodev/*'
