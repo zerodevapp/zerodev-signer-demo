@@ -49,14 +49,17 @@ const message = "Hello World";
 export function SigningTest() {
   const [mode, setMode] = useState<SigningMode>("message");
   const [payload, setPayload] = useState(message);
-  const [verificationResult, setVerificationResult] = useState<VerificationResult | null>(null);
   const [error, setError] = useState<string>("");
 
   // Wagmi hooks
   const { address } = useAccount();
   const publicClient = usePublicClient()
-  const { signMessage, data: messageSignature, isPending: isSigningMessage } = useSignMessage();
-  const { signTypedData, data: typedDataSignature, isPending: isSigningTypedData } = useSignTypedData();
+  const { signMessage, data: messageSignature, isPending: isSigningMessage, isSuccess: isMessageSuccess } = useSignMessage();
+  const { signTypedData, data: typedDataSignature, isPending: isSigningTypedData, isSuccess: isTypedDataSuccess } = useSignTypedData();
+  console.log("messageSignature", messageSignature);
+  console.log("isMessageSuccess", isMessageSuccess);
+  console.log("typedDataSignature", typedDataSignature);
+  console.log("isTypedDataSuccess", isTypedDataSuccess);
 
   const loading = isSigningMessage || isSigningTypedData;
   const result = messageSignature || typedDataSignature;
@@ -68,7 +71,6 @@ export function SigningTest() {
     }
 
     setError("");
-    setVerificationResult(null);
 
     try {
       if (mode === "message") {
@@ -82,57 +84,11 @@ export function SigningTest() {
     }
   };
 
-  // Verify signature when it's available
-  useEffect(() => {
-    if (!result || !address || !publicClient) return;
-
-    const verify = async () => {
-      try {
-        if (mode === "message") {
-          const isValid = await publicClient.verifyMessage({ address, message: payload, signature: result });
-          setVerificationResult({  isValid });
-        } else {
-          const typedData = JSON.parse(payload);
-          const isValid = await publicClient.verifyTypedData({ ...typedData, signature: result, address });
-          setVerificationResult({  isValid });
-        }
-      } catch (err) {
-        console.error("Verification failed:", err);
-      }
-    };
-
-    verify();
-  }, [result, address, mode, payload]);
 
   const loadSample = () => {
     if (mode === "message") {
       setPayload(message);
     } else {
-      // const typedData = {
-      //   domain: {
-      //     name: "Ether Mail",
-      //     version: "1",
-      //     chainId: 1,
-      //     verifyingContract: "0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC",
-      //   },
-      //   types: {
-      //     Person: [
-      //       { name: "name", type: "string" },
-      //       { name: "wallet", type: "address" },
-      //     ],
-      //     Mail: [
-      //       { name: "from", type: "Person" },
-      //       { name: "to", type: "Person" },
-      //       { name: "contents", type: "string" },
-      //     ],
-      //   },
-      //   primaryType: "Mail",
-      //   message: {
-      //     from: { name: "Cow", wallet: "0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826" },
-      //     to: { name: "Bob", wallet: "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB" },
-      //     contents: "Hello, Bob!",
-      //   },
-      // };
       setPayload(JSON.stringify(typedData, null, 2));
     }
   };
@@ -149,7 +105,7 @@ export function SigningTest() {
       {/* Mode Selector */}
       <div className="flex gap-2 p-1 bg-gray-100 rounded-lg">
         <button
-          onClick={() => { setMode("message"); setPayload("Hello World"); setVerificationResult(null); }}
+          onClick={() => { setMode("message"); setPayload("Hello World"); }}
           className={cn(
             "flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all",
             mode === "message" ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900"
@@ -158,7 +114,7 @@ export function SigningTest() {
           Message
         </button>
         <button
-          onClick={() => { setMode("typedData"); setPayload(JSON.stringify(typedData, null, 2)); setVerificationResult(null); }}
+          onClick={() => { setMode("typedData"); setPayload(JSON.stringify(typedData, null, 2)); }}
           className={cn(
             "flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all",
             mode === "typedData" ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900"
@@ -231,32 +187,12 @@ export function SigningTest() {
       )}
 
       {/* Success Result */}
-      {result && (
+      {(isMessageSuccess || isTypedDataSuccess) && (messageSignature || typedDataSignature) && (
         <div className="space-y-3">
           <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
             <p className="text-xs font-medium text-gray-500 mb-2">Signature</p>
-            <p className="text-xs text-gray-700 font-mono break-all">{result}</p>
+            <p className="text-xs text-gray-700 font-mono break-all">{mode === "message" ? messageSignature : typedDataSignature}</p>
           </div>
-
-          {verificationResult && (
-            <div className={cn(
-              "p-4 border rounded-lg",
-              verificationResult.isValid ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"
-            )}>
-              <div className="flex items-center gap-2 mb-3">
-                <Check className={cn(
-                  "h-4 w-4",
-                  verificationResult.isValid ? "text-green-600" : "text-red-600"
-                )} />
-                <p className={cn(
-                  "text-sm font-semibold",
-                  verificationResult.isValid ? "text-green-900" : "text-red-900"
-                )}>
-                  {verificationResult.isValid ? "Valid Signature" : "Invalid Signature"}
-                </p>
-              </div>
-            </div>
-          )}
         </div>
       )}
     </div>

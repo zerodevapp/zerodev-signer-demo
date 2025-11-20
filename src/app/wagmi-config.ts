@@ -9,15 +9,11 @@ export const config = createConfig({
   connectors: [
     zeroDevWallet({
       projectId: process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID!,
-      organizationId: process.env.NEXT_PUBLIC_TURNKEY_ORGANIZATION_ID,
-      proxyBaseUrl: process.env.NEXT_PUBLIC_KMS_PROXY_BASE_URL,
       aaUrl: process.env.NEXT_PUBLIC_ZERODEV_RPC_URL!,
       chains: [sepolia],
-      sessionWarningThreshold: 60 * 1000, // 890 seconds
       oauthConfig: {
         googleClientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-        redirectUri: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}`,
-        openInPage: false, // Use popup by default
+        redirectUri: `http://localhost:3000`,
       },
     })
   ],

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createPublicClient, http, formatEther, Address, isAddress } from "viem";
 import { sepolia } from "viem/chains";
-import { useAccount } from "wagmi";
+import { useAccount, useDisconnect } from "wagmi";
 
 export const dynamic = 'force-dynamic';
 import {
@@ -20,9 +20,7 @@ import {
 import { cn } from "../lib/utils";
 import { SigningTest } from "../components/SigningTest";
 import { SendTransactionTest } from "../components/SendTransactionTest";
-import { SessionExpiryWarning } from "../components/SessionExpiryWarning";
 import { ExportWalletModal } from "../components/ExportWalletModal";
-import { useLogout } from "@zerodev/wallet-react";
 
 type ActiveTab = "signing" | "transaction";
 
@@ -39,27 +37,8 @@ export default function DashboardPage() {
   const [showExportModal, setShowExportModal] = useState(false);
 
   // Wagmi hooks
-  const { address, isConnected, status,isReconnecting, isConnecting } = useAccount();
-  const logout = useLogout();
-
-  // useEffect(() => {
-  //   // Redirect to login if disconnected (but not while reconnecting)
-  //   console.log("Dashboard: status:", status);
-  //   console.log("Dashboard: isReconnecting:", isReconnecting);
-  //   console.log("Dashboard: isConnecting:", isConnecting);
-  //   if (isReconnecting || isConnecting) {
-  //     return;
-  //   }
-  //   if (status === 'disconnected') {
-  //     console.log("Dashboard: No session found, redirecting to login");
-  //     router.push("/");
-  //     return;
-  //   }
-
-  //   if (status === 'connected' && address) {
-  //     console.log("Dashboard: Authenticated with address:", address);
-  //   }
-  // }, [status, address, router]);
+  const { address, status } = useAccount();
+  const {disconnectAsync: logout} = useDisconnect();
 
   useEffect(() => {
     const loadBalance = async () => {
@@ -88,7 +67,7 @@ export default function DashboardPage() {
   };
 
   const handleLogout = async () => {
-    await logout.mutateAsync({});
+    await logout();
     router.push("/");
   };
 
@@ -113,7 +92,6 @@ export default function DashboardPage() {
 
   return (
     <>
-      <SessionExpiryWarning />
       <ExportWalletModal isOpen={showExportModal} onClose={() => setShowExportModal(false)} />
       <div className="min-h-screen bg-white">
         {/* Header */}
