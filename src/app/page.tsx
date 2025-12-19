@@ -29,9 +29,6 @@ export default function LandingPage() {
   const [otpCode, setOtpCode] = useState("");
   const [otpData, setOtpData] = useState<{ otpId: string; subOrganizationId: string } | null>(null);
 
-  // Privacy checkboxes state
-  const [optInUpdates, setOptInUpdates] = useState(false);
-
   const registerPasskey = useRegisterPasskey();
   const loginPasskey = useLoginPasskey();
   const authenticateOAuth = useAuthenticateOAuth();
