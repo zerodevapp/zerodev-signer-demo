@@ -1,9 +1,13 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createPublicClient, http, formatEther, Address, isAddress } from "viem";
 import { sepolia } from "viem/chains";
+import { useAccount, useDisconnect } from "wagmi";
+
+export const dynamic = 'force-dynamic';
 import {
   FileSignature,
   Send,
@@ -17,9 +21,7 @@ import {
 import { cn } from "../lib/utils";
 import { SigningTest } from "../components/SigningTest";
 import { SendTransactionTest } from "../components/SendTransactionTest";
-import { SessionExpiryWarning } from "../components/SessionExpiryWarning";
 import { ExportWalletModal } from "../components/ExportWalletModal";
-import { useZeroDevWalletProvider } from "../hooks/useZeroDevWalletProvider";
 
 type ActiveTab = "signing" | "transaction";
 
@@ -31,56 +33,23 @@ const tabs = [
 export default function DashboardPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<ActiveTab>("signing");
-  const [walletAddress, setWalletAddress] = useState<string>("");
   const [balance, setBalance] = useState<string>("0");
   const [copied, setCopied] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
 
-  const { getSession, toAccount, logout, isReady } = useZeroDevWalletProvider();
-
-  useEffect(() => {
-    const loadSession = async () => {
-      // Wait for SDK to be ready first
-      if (!isReady) {
-        console.log("Dashboard: SDK not ready yet, waiting...");
-        return;
-      }
-
-      try {
-        console.log("Dashboard: SDK ready, loading session...");
-        const session = await getSession();
-        console.log("Dashboard: Session result:", session);
-
-        if (!session) {
-          console.log("Dashboard: No session found, redirecting to login");
-          setTimeout(() => router.push("/"), 100);
-          return;
-        }
-
-        console.log("Dashboard: Session found, loading account...");
-
-        // Get wallet address from account
-        const account = await toAccount();
-        console.log("Dashboard: Account loaded:", account.address);
-        setWalletAddress(account.address);
-      } catch (err) {
-        console.error("Dashboard: Failed to load session/account:", err);
-        setTimeout(() => router.push("/"), 100);
-      }
-    };
-    loadSession();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isReady, getSession, toAccount, router]);
+  // Wagmi hooks
+  const { address, status } = useAccount();
+  const {disconnectAsync: logout} = useDisconnect();
 
   useEffect(() => {
     const loadBalance = async () => {
-      if (walletAddress && isAddress(walletAddress)) {
+      if (address && isAddress(address)) {
         try {
           const publicClient = createPublicClient({
             chain: sepolia,
             transport: http(process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL),
           });
-          const balanceWei = await publicClient.getBalance({ address: walletAddress as Address });
+          const balanceWei = await publicClient.getBalance({ address: address as Address });
           setBalance(formatEther(balanceWei));
         } catch (err) {
           console.error("Dashboard: Failed to load balance:", err);
@@ -89,11 +58,11 @@ export default function DashboardPage() {
       }
     };
     loadBalance();
-  }, [walletAddress]);
+  }, [address]);
 
   const handleCopy = async () => {
-    if (!walletAddress) return;
-    await navigator.clipboard.writeText(walletAddress);
+    if (!address) return;
+    await navigator.clipboard.writeText(address);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -108,13 +77,14 @@ export default function DashboardPage() {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
-  if (!isReady || !walletAddress) {
+  // Show loading while connecting or reconnecting
+  if (status === 'connecting' || status === 'reconnecting' || !address) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="flex items-center gap-2">
           <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
           <span className="text-sm text-gray-600">
-            {!isReady ? "Initializing SDK..." : "Loading wallet..."}
+            {status === 'reconnecting' ? 'Reconnecting...' : 'Loading wallet...'}
           </span>
         </div>
       </div>
@@ -123,7 +93,6 @@ export default function DashboardPage() {
 
   return (
     <>
-      <SessionExpiryWarning />
       <ExportWalletModal isOpen={showExportModal} onClose={() => setShowExportModal(false)} />
       <div className="min-h-screen bg-white">
         {/* Header */}
@@ -131,38 +100,18 @@ export default function DashboardPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               {/* Logo */}
-              <div className="flex items-center gap-2">
-                <svg
-                  className="w-7 h-7 text-gray-900"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M12 2L2 7V17L12 22L22 17V7L12 2Z"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M12 22V12"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M22 7L12 12L2 7"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                <span className="text-lg font-semibold text-gray-900">ZeroDev Wallet</span>
-                <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full font-medium">
-                  Demo
+              <div className="flex items-center gap-3">
+                <img
+                  src="/images/zerodev-logo.png"
+                  alt="ZeroDev Logo"
+                  className="w-8 h-8"
+                />
+                <div className="flex flex-col">
+                  <span className="text-lg font-semibold text-gray-900 leading-tight">ZeroDev</span>
+                  <span className="text-[10px] text-gray-500">By Offchain Labs</span>
+                </div>
+                <span className="text-xs px-2.5 py-1 bg-blue-50 text-blue-600 rounded-full font-medium border border-blue-100">
+                  Wallet Demo
                 </span>
               </div>
 
@@ -170,7 +119,7 @@ export default function DashboardPage() {
               <div className="flex items-center gap-3">
                 <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-200 group cursor-pointer">
                   <Wallet className="h-4 w-4 text-gray-500" />
-                  <span className="text-sm font-mono text-gray-700">{formatAddress(walletAddress)}</span>
+                  <span className="text-sm font-mono text-gray-700">{formatAddress(address)}</span>
                   <button
                     onClick={handleCopy}
                     className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -217,10 +166,10 @@ export default function DashboardPage() {
               </button>
             </div>
             <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
-              <span className="font-mono text-xs sm:text-sm break-all">{walletAddress}</span>
+              <span className="font-mono text-xs sm:text-sm break-all">{address}</span>
               <button
                 onClick={handleCopy}
-                className="text-gray-400 hover:text-gray-600 flex-shrink-0"
+                className="text-gray-400 hover:text-gray-600 shrink-0"
                 title="Copy address"
               >
                 {copied ? (
@@ -249,13 +198,13 @@ export default function DashboardPage() {
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
                       className={cn(
-                        "flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-medium transition-all duration-200 border-b-2",
+                        "flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-medium transition-all duration-200",
                         isActive
-                          ? "border-gray-900 text-gray-900 bg-gray-50"
-                          : "border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                          ? "text-gray-900 underline decoration-2 decoration-blue-600 underline-offset-8"
+                          : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
                       )}
                     >
-                      <Icon className="h-4 w-4 flex-shrink-0" />
+                      <Icon className="h-4 w-4 shrink-0" />
                       <span className="truncate">{tab.name}</span>
                     </button>
                   );

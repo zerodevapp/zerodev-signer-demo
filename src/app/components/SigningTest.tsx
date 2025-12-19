@@ -1,29 +1,15 @@
 "use client";
 
+import { AlertCircle, FileSignature, Loader2, Sparkles } from "lucide-react";
 import { useState } from "react";
-import { FileSignature, Check, AlertCircle, Loader2, Sparkles } from "lucide-react";
+import { useAccount, useSignMessage, useSignTypedData } from "wagmi";
 import { cn } from "../lib/utils";
-import { useZeroDevWalletProvider } from "../hooks/useZeroDevWalletProvider";
-import {
-  type Hex,
-  verifyMessage,
-  recoverMessageAddress,
-  recoverTypedDataAddress,
-  parseSignature,
-  serializeSignature,
-  http,
-  createWalletClient,
-  verifyTypedData,
-} from "viem";
-import { sepolia } from "viem/chains";
 
 type SigningMode = "message" | "typedData";
 
-type VerificationResult = {
-  recoveredAddress: Hex;
-  expectedAddress: Hex;
-  isValid: boolean;
-};
+// type VerificationResult = {
+//   isValid: boolean;
+// };
 
 const typedData = {
   domain: {
@@ -56,87 +42,46 @@ const message = "Hello World";
 export function SigningTest() {
   const [mode, setMode] = useState<SigningMode>("message");
   const [payload, setPayload] = useState(message);
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<Hex | null>(null);
-  const [verificationResult, setVerificationResult] = useState<VerificationResult | null>(null);
   const [error, setError] = useState<string>("");
 
-  const { isReady, toAccount } = useZeroDevWalletProvider();
+  // Wagmi hooks
+  const { address } = useAccount();
+  // const publicClient = usePublicClient()
+  const { signMessage, data: messageSignature, isPending: isSigningMessage, isSuccess: isMessageSuccess } = useSignMessage();
+  const { signTypedData, data: typedDataSignature, isPending: isSigningTypedData, isSuccess: isTypedDataSuccess } = useSignTypedData();
+  console.log("messageSignature", messageSignature);
+  console.log("isMessageSuccess", isMessageSuccess);
+  console.log("typedDataSignature", typedDataSignature);
+  console.log("isTypedDataSuccess", isTypedDataSuccess);
+
+  const loading = isSigningMessage || isSigningTypedData;
+  // const result = messageSignature || typedDataSignature;
 
   const handleSign = async () => {
-    if (!isReady) {
+    if (!address) {
       setError("Please authenticate first");
       return;
     }
 
-    setLoading(true);
     setError("");
-    setResult(null);
-    setVerificationResult(null);
 
     try {
-      const viemAccount = await toAccount();
-      const expectedAddress = viemAccount.address;
-      let signature: Hex;
-
       if (mode === "message") {
-        signature = await viemAccount.signMessage({ message: payload });
-        const recoveredAddress = await recoverMessageAddress({ message: payload, signature });
-        const isValid = await verifyMessage({ address: expectedAddress, message: payload, signature });
-
-        setVerificationResult({ recoveredAddress, expectedAddress, isValid });
+        signMessage({ message: payload });
       } else {
-        const typedData = JSON.parse(payload);
-        const walletClient = createWalletClient({
-          transport: http(process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL),
-          chain: sepolia,
-          account: viemAccount,
-        });
-        signature = await walletClient.signTypedData(typedData);
-        signature = serializeSignature(parseSignature(signature));
-        const isValid = await verifyTypedData({ ...typedData, signature, address: expectedAddress });
-        const recoveredAddress = await recoverTypedDataAddress({ ...typedData, signature });
-
-        setVerificationResult({ recoveredAddress, expectedAddress, isValid });
+        const parsedTypedData = JSON.parse(payload);
+        signTypedData(parsedTypedData);
       }
-
-      setResult(signature);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Signing failed");
-    } finally {
-      setLoading(false);
     }
   };
+
 
   const loadSample = () => {
     if (mode === "message") {
       setPayload(message);
     } else {
-      // const typedData = {
-      //   domain: {
-      //     name: "Ether Mail",
-      //     version: "1",
-      //     chainId: 1,
-      //     verifyingContract: "0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC",
-      //   },
-      //   types: {
-      //     Person: [
-      //       { name: "name", type: "string" },
-      //       { name: "wallet", type: "address" },
-      //     ],
-      //     Mail: [
-      //       { name: "from", type: "Person" },
-      //       { name: "to", type: "Person" },
-      //       { name: "contents", type: "string" },
-      //     ],
-      //   },
-      //   primaryType: "Mail",
-      //   message: {
-      //     from: { name: "Cow", wallet: "0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826" },
-      //     to: { name: "Bob", wallet: "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB" },
-      //     contents: "Hello, Bob!",
-      //   },
-      // };
       setPayload(JSON.stringify(typedData, null, 2));
     }
   };
@@ -153,7 +98,7 @@ export function SigningTest() {
       {/* Mode Selector */}
       <div className="flex gap-2 p-1 bg-gray-100 rounded-lg">
         <button
-          onClick={() => { setMode("message"); setPayload("Hello World"); setResult(null); setVerificationResult(null); }}
+          onClick={() => { setMode("message"); setPayload("Hello World"); }}
           className={cn(
             "flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all",
             mode === "message" ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900"
@@ -162,7 +107,7 @@ export function SigningTest() {
           Message
         </button>
         <button
-          onClick={() => { setMode("typedData"); setPayload(JSON.stringify(typedData, null, 2)); setResult(null); setVerificationResult(null); }}
+          onClick={() => { setMode("typedData"); setPayload(JSON.stringify(typedData, null, 2)); }}
           className={cn(
             "flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all",
             mode === "typedData" ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900"
@@ -202,12 +147,14 @@ export function SigningTest() {
       {/* Sign Button */}
       <button
         onClick={handleSign}
-        disabled={loading || !payload.trim() || !isReady}
+        disabled={loading || !payload.trim() || !address}
         className={cn(
-          "w-full py-3 px-4 rounded-lg font-semibold text-sm transition-all",
-          "bg-gray-900 text-white hover:bg-gray-800",
+          "w-full py-3 px-4 rounded-lg font-semibold text-sm transition-all duration-200 cursor-pointer",
+          "bg-linear-to-r from-blue-600 to-blue-700 text-white",
+          "hover:from-blue-700 hover:to-blue-800 active:from-blue-800 active:to-blue-900",
           "disabled:opacity-50 disabled:cursor-not-allowed",
-          "flex items-center justify-center gap-2"
+          "flex items-center justify-center gap-2",
+          "shadow-sm hover:shadow"
         )}
       >
         {loading ? (
@@ -235,42 +182,12 @@ export function SigningTest() {
       )}
 
       {/* Success Result */}
-      {result && (
+      {(isMessageSuccess || isTypedDataSuccess) && (messageSignature || typedDataSignature) && (
         <div className="space-y-3">
           <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
             <p className="text-xs font-medium text-gray-500 mb-2">Signature</p>
-            <p className="text-xs text-gray-700 font-mono break-all">{result}</p>
+            <p className="text-xs text-gray-700 font-mono break-all">{mode === "message" ? messageSignature : typedDataSignature}</p>
           </div>
-
-          {verificationResult && (
-            <div className={cn(
-              "p-4 border rounded-lg",
-              verificationResult.isValid ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"
-            )}>
-              <div className="flex items-center gap-2 mb-3">
-                <Check className={cn(
-                  "h-4 w-4",
-                  verificationResult.isValid ? "text-green-600" : "text-red-600"
-                )} />
-                <p className={cn(
-                  "text-sm font-semibold",
-                  verificationResult.isValid ? "text-green-900" : "text-red-900"
-                )}>
-                  {verificationResult.isValid ? "Valid Signature" : "Invalid Signature"}
-                </p>
-              </div>
-              <div className="space-y-2">
-                <div>
-                  <p className="text-xs font-medium text-gray-600">Expected Address</p>
-                  <p className="text-xs font-mono text-gray-900">{verificationResult.expectedAddress}</p>
-                </div>
-                <div>
-                  <p className="text-xs font-medium text-gray-600">Recovered Address</p>
-                  <p className="text-xs font-mono text-gray-900">{verificationResult.recoveredAddress}</p>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       )}
     </div>

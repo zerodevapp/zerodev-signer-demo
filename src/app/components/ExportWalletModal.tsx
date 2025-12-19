@@ -3,25 +3,21 @@
 import { useState } from "react";
 import { Download, X, AlertTriangle, Loader2 } from "lucide-react";
 import { cn } from "../lib/utils";
-import { useZeroDevWalletProvider } from "../hooks/useZeroDevWalletProvider";
+import { useExportWallet } from "@zerodev/wallet-react";
 
-interface ExportWalletModalProps {
+type ExportWalletModalProps = {
   isOpen: boolean;
   onClose: () => void;
 }
 
 const iframeContainerId = "export-wallet-iframe-container";
 export function ExportWalletModal({ isOpen, onClose }: ExportWalletModalProps) {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const [showWarning, setShowWarning] = useState(true);
   const [exporting, setExporting] = useState(false);
 
-  const { exportWallet } = useZeroDevWalletProvider();
+  const exportWallet = useExportWallet();
 
   const handleExport = async () => {
-    setLoading(true);
-    setError("");
     setShowWarning(false);
     setExporting(true);
 
@@ -29,22 +25,18 @@ export function ExportWalletModal({ isOpen, onClose }: ExportWalletModalProps) {
     await new Promise(resolve => setTimeout(resolve, 100));
 
     try {
-      await exportWallet(iframeContainerId);
+      await exportWallet.mutateAsync({ iframeContainerId });
       // Iframe will show the seed phrase
     } catch (err) {
       console.error("Export error:", err);
-      setError(err instanceof Error ? err.message : "Failed to export wallet");
       setShowWarning(true);
-      setExporting(false);
-    } finally {
-      setLoading(false);
+      setExporting(true);
     }
   };
 
   const handleClose = () => {
     setShowWarning(true);
     setExporting(false);
-    setError("");
     onClose();
   };
 
@@ -72,7 +64,7 @@ export function ExportWalletModal({ isOpen, onClose }: ExportWalletModalProps) {
           {/* Warning */}
           {showWarning && !exporting && (
             <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+              <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5 shrink-0" />
               <div className="flex-1">
                 <p className="text-sm font-semibold text-red-900 mb-2">Security Warning</p>
                 <ul className="text-sm text-red-700 space-y-1.5">
@@ -94,7 +86,7 @@ export function ExportWalletModal({ isOpen, onClose }: ExportWalletModalProps) {
 
               <button
                 onClick={handleExport}
-                disabled={loading}
+                disabled={exportWallet.isPending}
                 className={cn(
                   "w-full py-3 px-4 rounded-lg font-semibold text-sm",
                   "bg-red-600 text-white hover:bg-red-700",
@@ -102,7 +94,7 @@ export function ExportWalletModal({ isOpen, onClose }: ExportWalletModalProps) {
                   "flex items-center justify-center gap-2"
                 )}
               >
-                {loading ? (
+                {exportWallet.isPending ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
                     Exporting...
@@ -142,12 +134,12 @@ export function ExportWalletModal({ isOpen, onClose }: ExportWalletModalProps) {
           )}
 
           {/* Error */}
-          {error && (
+          {exportWallet.error && (
             <div className="flex items-start gap-2 px-4 py-3 bg-red-50 border border-red-100 rounded-lg">
               <AlertTriangle className="h-4 w-4 text-red-600 mt-0.5" />
               <div>
                 <p className="text-sm font-medium text-red-900">Export Failed</p>
-                <p className="text-sm text-red-700 mt-0.5">{error}</p>
+                <p className="text-sm text-red-700 mt-0.5">{exportWallet.error.message}</p>
               </div>
             </div>
           )}

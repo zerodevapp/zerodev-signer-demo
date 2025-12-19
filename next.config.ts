@@ -1,8 +1,7 @@
 import type { NextConfig } from "next";
-import path from "path";
 
 const nextConfig: NextConfig = {
-  transpilePackages: [],
+  reactStrictMode: true,
 };
 
 export default nextConfig;

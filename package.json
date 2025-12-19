@@ -9,13 +9,11 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@react-oauth/google": "^0.12.2",
-    "@turnkey/sdk-browser": "^5.4.1",
-    "@turnkey/sdk-react": "^5.2.11",
-    "@turnkey/sdk-server": "^4.3.0",
-    "@turnkey/viem": "^0.10.5",
+    "@tanstack/react-query": "^5.0.0",
+    "@wagmi/core": "^2.22.0",
     "@zerodev/sdk": "^5.0.0",
     "@zerodev/wallet-core": "0.0.1-alpha.5",
+    "@zerodev/wallet-react": "0.0.1-alpha.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.545.0",
@@ -24,7 +22,9 @@
     "react-dom": "19.2.3",
     "react-hook-form": "^7.68.0",
     "tailwind-merge": "^3.3.1",
-    "viem": "2.37.6"
+    "viem": "2.38.6",
+    "wagmi": "^2.19.0",
+    "zustand": "^5.0.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -37,6 +37,7 @@
     "patch-package": "^8.0.0",
     "postinstall-postinstall": "^2.1.0",
     "tailwindcss": "^4",
-    "typescript": "^5"
-  }
+    "typescript": "~5.9.2"
+  },
+  "workspaces": []
 }
