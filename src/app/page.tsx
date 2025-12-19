@@ -162,7 +162,7 @@ export default function LandingPage() {
 
             {/* Brand Name & Subtitle */}
             <div>
-              <h1 className="text-2xl font-semibold tracking-tight text-gray-900">ZeroDev</h1>
+              <h1 className="text-2xl font-semibold tracking-tight text-gray-900">ZeroDev Wallet Demo</h1>
               <p className="text-xs text-gray-500 mt-1">By Offchain Labs</p>
               <p className="text-base text-gray-600 mt-3 font-medium">Log in or sign up</p>
             </div>
