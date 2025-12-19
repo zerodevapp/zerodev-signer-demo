@@ -185,11 +185,12 @@ export function SendTransactionTest() {
       )}
 
       {/* Gasless Info */}
-      <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
-        <Sparkles className="h-4 w-4 text-blue-600" />
-        <p className="text-sm font-medium text-blue-700">
-          All transactions are gasless via EIP-7702
-        </p>
+      <div className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+        <Sparkles className="h-4 w-4 text-blue-600 shrink-0 mt-0.5" />
+        <div>
+          <p className="text-sm font-medium text-blue-900">Gasless transactions are active</p>
+          <p className="text-xs text-blue-700 mt-0.5">You have 10 free transactions remaining today.</p>
+        </div>
       </div>
 
       {/* Form */}
@@ -238,10 +239,12 @@ export function SendTransactionTest() {
         onClick={() => mode === "send-eth" ? handleSendEth() : handleMintNft()}
         disabled={loading || (mode === "send-eth" && !recipient)}
         className={cn(
-          "w-full py-3 px-4 rounded-lg font-semibold text-sm transition-all",
-          "bg-gray-900 text-white hover:bg-gray-800",
+          "w-full py-3 px-4 rounded-lg font-semibold text-sm transition-all duration-200 cursor-pointer",
+          "bg-linear-to-r from-blue-600 to-blue-700 text-white",
+          "hover:from-blue-700 hover:to-blue-800 active:from-blue-800 active:to-blue-900",
           "disabled:opacity-50 disabled:cursor-not-allowed",
-          "flex items-center justify-center gap-2"
+          "flex items-center justify-center gap-2",
+          "shadow-sm hover:shadow"
         )}
       >
         {loading ? (
@@ -254,12 +257,12 @@ export function SendTransactionTest() {
             {mode === "send-eth" ? (
               <>
                 <Send className="h-4 w-4" />
-                Send Gasless ETH
+                Send ETH
               </>
             ) : (
               <>
                 <Sparkles className="h-4 w-4" />
-                Mint Gasless NFT
+                Mint NFT
               </>
             )}
           </>

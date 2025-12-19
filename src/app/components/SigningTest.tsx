@@ -1,22 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { FileSignature, Check, AlertCircle, Loader2, Sparkles } from "lucide-react";
+import { AlertCircle, FileSignature, Loader2, Sparkles } from "lucide-react";
+import { useState } from "react";
+import { useAccount, useSignMessage, useSignTypedData } from "wagmi";
 import { cn } from "../lib/utils";
-import { useAccount, usePublicClient, useSignMessage, useSignTypedData } from "wagmi";
-import {
-  type Hex,
-  verifyMessage,
-  recoverMessageAddress,
-  recoverTypedDataAddress,
-  verifyTypedData,
-} from "viem";
 
 type SigningMode = "message" | "typedData";
 
-type VerificationResult = {
-  isValid: boolean;
-};
+// type VerificationResult = {
+//   isValid: boolean;
+// };
 
 const typedData = {
   domain: {
@@ -53,7 +46,7 @@ export function SigningTest() {
 
   // Wagmi hooks
   const { address } = useAccount();
-  const publicClient = usePublicClient()
+  // const publicClient = usePublicClient()
   const { signMessage, data: messageSignature, isPending: isSigningMessage, isSuccess: isMessageSuccess } = useSignMessage();
   const { signTypedData, data: typedDataSignature, isPending: isSigningTypedData, isSuccess: isTypedDataSuccess } = useSignTypedData();
   console.log("messageSignature", messageSignature);
@@ -62,7 +55,7 @@ export function SigningTest() {
   console.log("isTypedDataSuccess", isTypedDataSuccess);
 
   const loading = isSigningMessage || isSigningTypedData;
-  const result = messageSignature || typedDataSignature;
+  // const result = messageSignature || typedDataSignature;
 
   const handleSign = async () => {
     if (!address) {
@@ -156,10 +149,12 @@ export function SigningTest() {
         onClick={handleSign}
         disabled={loading || !payload.trim() || !address}
         className={cn(
-          "w-full py-3 px-4 rounded-lg font-semibold text-sm transition-all",
-          "bg-gray-900 text-white hover:bg-gray-800",
+          "w-full py-3 px-4 rounded-lg font-semibold text-sm transition-all duration-200 cursor-pointer",
+          "bg-linear-to-r from-blue-600 to-blue-700 text-white",
+          "hover:from-blue-700 hover:to-blue-800 active:from-blue-800 active:to-blue-900",
           "disabled:opacity-50 disabled:cursor-not-allowed",
-          "flex items-center justify-center gap-2"
+          "flex items-center justify-center gap-2",
+          "shadow-sm hover:shadow"
         )}
       >
         {loading ? (

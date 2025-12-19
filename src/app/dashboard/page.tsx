@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -99,38 +100,18 @@ export default function DashboardPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               {/* Logo */}
-              <div className="flex items-center gap-2">
-                <svg
-                  className="w-7 h-7 text-gray-900"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M12 2L2 7V17L12 22L22 17V7L12 2Z"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M12 22V12"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M22 7L12 12L2 7"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                <span className="text-lg font-semibold text-gray-900">ZeroDev Wallet</span>
-                <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full font-medium">
-                  Demo
+              <div className="flex items-center gap-3">
+                <img
+                  src="/images/zerodev-logo.png"
+                  alt="ZeroDev Logo"
+                  className="w-8 h-8"
+                />
+                <div className="flex flex-col">
+                  <span className="text-lg font-semibold text-gray-900 leading-tight">ZeroDev</span>
+                  <span className="text-[10px] text-gray-500">By Offchain Labs</span>
+                </div>
+                <span className="text-xs px-2.5 py-1 bg-blue-50 text-blue-600 rounded-full font-medium border border-blue-100">
+                  Wallet Demo
                 </span>
               </div>
 
@@ -188,7 +169,7 @@ export default function DashboardPage() {
               <span className="font-mono text-xs sm:text-sm break-all">{address}</span>
               <button
                 onClick={handleCopy}
-                className="text-gray-400 hover:text-gray-600 flex-shrink-0"
+                className="text-gray-400 hover:text-gray-600 shrink-0"
                 title="Copy address"
               >
                 {copied ? (
@@ -217,13 +198,13 @@ export default function DashboardPage() {
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
                       className={cn(
-                        "flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-medium transition-all duration-200 border-b-2",
+                        "flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-medium transition-all duration-200",
                         isActive
-                          ? "border-gray-900 text-gray-900 bg-gray-50"
-                          : "border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                          ? "text-gray-900 underline decoration-2 decoration-blue-600 underline-offset-8"
+                          : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
                       )}
                     >
-                      <Icon className="h-4 w-4 flex-shrink-0" />
+                      <Icon className="h-4 w-4 shrink-0" />
                       <span className="truncate">{tab.name}</span>
                     </button>
                   );

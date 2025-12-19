@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useState } from "react";
@@ -27,6 +28,9 @@ export default function LandingPage() {
   const [otpStep, setOtpStep] = useState<OTPStep>('send');
   const [otpCode, setOtpCode] = useState("");
   const [otpData, setOtpData] = useState<{ otpId: string; subOrganizationId: string } | null>(null);
+
+  // Privacy checkboxes state
+  const [optInUpdates, setOptInUpdates] = useState(false);
 
   const registerPasskey = useRegisterPasskey();
   const loginPasskey = useLoginPasskey();
@@ -149,43 +153,21 @@ export default function LandingPage() {
       <div className="w-full max-w-[450px]">
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
           {/* Logo/Brand - Inside Card */}
-          <div className="px-8 pt-10 pb-6 text-center space-y-4">
-            <div className="inline-flex items-center justify-center relative">
-              <svg
-                className="w-12 h-12"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M12 2L2 7V17L12 22L22 17V7L12 2Z"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M12 22V12"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M22 7L12 12L2 7"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              <span className="absolute -top-1 -right-8 text-xs px-2 py-1 bg-blue-50 text-blue-600 rounded-full font-medium">
-                Demo
-              </span>
+          <div className="px-8 pt-10 pb-6 text-center space-y-4 relative">
+            {/* Logo */}
+            <div className="inline-flex items-center justify-center">
+              <img
+                src="/images/zerodev-logo.png"
+                alt="ZeroDev Logo"
+                className="w-16 h-16"
+              />
             </div>
+
+            {/* Brand Name & Subtitle */}
             <div>
-              <h1 className="text-2xl font-semibold tracking-tight text-gray-900">ZeroDev Wallet</h1>
-              <p className="text-sm text-gray-500 mt-2 font-medium">Log in or sign up</p>
+              <h1 className="text-2xl font-semibold tracking-tight text-gray-900">ZeroDev</h1>
+              <p className="text-xs text-gray-500 mt-1">By Offchain Labs</p>
+              <p className="text-base text-gray-600 mt-3 font-medium">Log in or sign up</p>
             </div>
           </div>
 
@@ -247,10 +229,12 @@ export default function LandingPage() {
                   onClick={handlePasskeyRegister}
                   disabled={!email.trim() || loadingAction !== null}
                   className={cn(
-                    "w-full py-3 px-4 rounded-lg font-medium text-sm transition-all duration-200",
-                    "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50",
+                    "w-full py-3 px-4 rounded-lg font-semibold text-sm transition-all duration-200 cursor-pointer",
+                    "bg-linear-to-r from-blue-600 to-blue-700 text-white",
+                    "hover:from-blue-700 hover:to-blue-800 active:from-blue-800 active:to-blue-900",
                     "disabled:opacity-50 disabled:cursor-not-allowed",
-                    "flex items-center justify-center gap-2"
+                    "flex items-center justify-center gap-2",
+                    "shadow-sm hover:shadow"
                   )}
                 >
                   {loadingAction === "passkey-register" ? (
@@ -271,10 +255,12 @@ export default function LandingPage() {
                   onClick={handlePasskeyLogin}
                   disabled={!email.trim() || loadingAction !== null}
                   className={cn(
-                    "w-full py-3 px-4 rounded-lg font-medium text-sm transition-all duration-200",
-                    "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50",
+                    "w-full py-3 px-4 rounded-lg font-semibold text-sm transition-all duration-200 cursor-pointer",
+                    "bg-linear-to-r from-blue-600 to-blue-700 text-white",
+                    "hover:from-blue-700 hover:to-blue-800 active:from-blue-800 active:to-blue-900",
                     "disabled:opacity-50 disabled:cursor-not-allowed",
-                    "flex items-center justify-center gap-2"
+                    "flex items-center justify-center gap-2",
+                    "shadow-sm hover:shadow"
                   )}
                 >
                   {loadingAction === "passkey-login" ? (
@@ -307,10 +293,12 @@ export default function LandingPage() {
                   onClick={handleEmailAuth}
                   disabled={!email.trim() || loadingAction !== null}
                   className={cn(
-                    "w-full py-3 px-4 rounded-lg font-medium text-sm transition-all duration-200",
-                    "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50",
+                    "w-full py-3 px-4 rounded-lg font-semibold text-sm transition-all duration-200 cursor-pointer",
+                    "bg-linear-to-r from-blue-600 to-blue-700 text-white",
+                    "hover:from-blue-700 hover:to-blue-800 active:from-blue-800 active:to-blue-900",
                     "disabled:opacity-50 disabled:cursor-not-allowed",
-                    "flex items-center justify-center gap-2"
+                    "flex items-center justify-center gap-2",
+                    "shadow-sm hover:shadow"
                   )}
                 >
                   {loadingAction === "email" ? (
@@ -331,10 +319,12 @@ export default function LandingPage() {
                   onClick={handleOTPSend}
                   disabled={!email.trim() || loadingAction !== null}
                   className={cn(
-                    "w-full py-3 px-4 rounded-lg font-medium text-sm transition-all duration-200",
-                    "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50",
+                    "w-full py-3 px-4 rounded-lg font-semibold text-sm transition-all duration-200 cursor-pointer",
+                    "bg-linear-to-r from-blue-600 to-blue-700 text-white",
+                    "hover:from-blue-700 hover:to-blue-800 active:from-blue-800 active:to-blue-900",
                     "disabled:opacity-50 disabled:cursor-not-allowed",
-                    "flex items-center justify-center gap-2"
+                    "flex items-center justify-center gap-2",
+                    "shadow-sm hover:shadow"
                   )}
                 >
                   {loadingAction === "otp-send" ? (
@@ -358,10 +348,11 @@ export default function LandingPage() {
                 onClick={handleOTPVerify}
                 disabled={!otpCode.trim() || loadingAction !== null}
                 className={cn(
-                  "w-full py-3.5 px-4 rounded-lg font-semibold text-[15px] transition-all duration-200",
-                  "bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800",
+                  "w-full py-3 px-4 rounded-lg font-semibold text-sm transition-all duration-200 cursor-pointer",
+                  "bg-linear-to-r from-blue-600 to-blue-700 text-white",
+                  "hover:from-blue-700 hover:to-blue-800 active:from-blue-800 active:to-blue-900",
                   "disabled:opacity-50 disabled:cursor-not-allowed",
-                  "flex items-center justify-center gap-2.5",
+                  "flex items-center justify-center gap-2",
                   "shadow-sm hover:shadow"
                 )}
               >
@@ -396,10 +387,12 @@ export default function LandingPage() {
                 onClick={handleGoogleOAuth}
                 disabled={loadingAction !== null}
                 className={cn(
-                  "w-full py-3 px-4 rounded-lg font-medium text-sm transition-all duration-200",
-                  "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50",
+                  "w-full py-3.5 px-4 rounded-lg font-semibold text-[15px] transition-all duration-200 cursor-pointer",
+                  "bg-linear-to-r from-blue-600 to-blue-700 text-white",
+                  "hover:from-blue-700 hover:to-blue-800 active:from-blue-800 active:to-blue-900",
                   "disabled:opacity-50 disabled:cursor-not-allowed",
-                  "flex items-center justify-center gap-2"
+                  "flex items-center justify-center gap-2.5",
+                  "shadow-md hover:shadow-lg"
                 )}
               >
                 {loadingAction === "oauth" ? (
@@ -419,6 +412,13 @@ export default function LandingPage() {
                   </>
                 )}
               </button>
+            )}
+
+            {/* Terms Notification - Only show if not in OTP verify */}
+            {otpStep === 'send' && (
+              <p className="text-xs text-gray-500 text-left">
+                By continuing, you agree to our <a href="https://zerodev.app/terms-of-service" className="text-blue-600 hover:text-blue-700 underline">Terms of Service</a> and <a href="https://zerodev.app/privacy-policy" className="text-blue-600 hover:text-blue-700 underline">ZeroDev Privacy Policy</a>
+              </p>
             )}
           </div>
 
