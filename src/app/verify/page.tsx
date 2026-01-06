@@ -3,64 +3,56 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useVerifyOTP } from '@zerodev/wallet-react';
-import { useAccount } from 'wagmi';
 
 function VerifyContent() {
   const searchParams = useSearchParams();
-  const { isConnected } = useAccount();
   const verifyOTP = useVerifyOTP();
   const [verificationState, setVerificationState] = useState<'loading' | 'success' | 'error'>('loading');
   const [errorMessage, setErrorMessage] = useState<string>('');
 
-  const isReady = isConnected;
-
   useEffect(() => {
     async function tryLoginWithBundle() {
-      if (isReady) {
-        const otp = searchParams.get('otp')
-        console.log('otp', otp)
-        const otpId = localStorage.getItem("otpId");
-        const subOrganizationId = localStorage.getItem("subOrganizationId");
-        if (!otpId || !subOrganizationId) {
-          setVerificationState('error');
-          setErrorMessage('No OTP ID or subOrganization ID found');
-          return;
-        }
+      const otp = searchParams.get('otp')
+      console.log('otp', otp)
+      const otpId = localStorage.getItem("otpId");
+      const subOrganizationId = localStorage.getItem("subOrganizationId");
+      if (!otpId || !subOrganizationId) {
+        setVerificationState('error');
+        setErrorMessage('No OTP ID or subOrganization ID found');
+        return;
+      }
 
-        if (!otp) {
-          setVerificationState('error');
-          setErrorMessage('No OTP found in URL');
-          return;
-        }
-        
-        // Small delay to ensure SDK is fully ready
-        await new Promise(resolve => setTimeout(resolve, 500));
+      if (!otp) {
+        setVerificationState('error');
+        setErrorMessage('No OTP found in URL');
+        return;
+      }
 
-        try {
-          await verifyOTP.mutateAsync({
-            code: otp,
-            otpId,
-            subOrganizationId,
-          });
+      // Small delay to ensure SDK is fully ready
+      await new Promise(resolve => setTimeout(resolve, 500));
 
-          setVerificationState('success');
-          
-          setTimeout(() => {
-            location.href = '/dashboard';
-          }, 2000);
-        } catch(error) {
-          console.log(error);
-          setVerificationState('error');
-          setErrorMessage(error instanceof Error ? error.message : 'Authentication failed');
-        }
+      try {
+        await verifyOTP.mutateAsync({
+          code: otp,
+          otpId,
+          subOrganizationId,
+        });
+
+        setVerificationState('success');
+
+        setTimeout(() => {
+          location.href = '/dashboard';
+        }, 2000);
+      } catch (error) {
+        console.log(error);
+        setVerificationState('error');
+        setErrorMessage(error instanceof Error ? error.message : 'Authentication failed');
       }
     }
 
-    if (isReady) {
-      tryLoginWithBundle();
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isReady]);
+    tryLoginWithBundle();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -95,7 +87,7 @@ function VerifyContent() {
             </div>
             <h2 className="text-xl font-semibold text-gray-900 mb-2">Verification Failed</h2>
             <p className="text-gray-600 mb-4">{errorMessage}</p>
-            <button 
+            <button
               onClick={() => location.href = '/dashboard'}
               className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
             >
