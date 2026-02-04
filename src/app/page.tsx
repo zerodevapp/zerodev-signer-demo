@@ -211,7 +211,7 @@ export default function LandingPage() {
                 />
                 <button
                   onClick={resetOTP}
-                  className="text-sm text-gray-500 hover:text-gray-700"
+                  className="text-sm text-gray-500 hover:text-gray-700 cursor-pointer"
                 >
                   ← Use a different email
                 </button>
@@ -225,13 +225,14 @@ export default function LandingPage() {
                 <button
                   onClick={handlePasskeyRegister}
                   disabled={!email.trim() || loadingAction !== null}
+                  style={{
+                    background: 'linear-gradient(white, white) padding-box, linear-gradient(to right, #22d3ee, #2563eb) border-box',
+                  }}
                   className={cn(
                     "w-full py-3 px-4 rounded-lg font-semibold text-sm transition-all duration-200 cursor-pointer",
-                    "bg-linear-to-r from-blue-600 to-blue-700 text-white",
-                    "hover:from-blue-700 hover:to-blue-800 active:from-blue-800 active:to-blue-900",
+                    "border-2 border-transparent text-blue-500",
                     "disabled:opacity-50 disabled:cursor-not-allowed",
-                    "flex items-center justify-center gap-2",
-                    "shadow-sm hover:shadow"
+                    "flex items-center justify-center gap-2"
                   )}
                 >
                   {loadingAction === "passkey-register" ? (
@@ -251,13 +252,14 @@ export default function LandingPage() {
                 <button
                   onClick={handlePasskeyLogin}
                   disabled={!email.trim() || loadingAction !== null}
+                  style={{
+                    background: 'linear-gradient(white, white) padding-box, linear-gradient(to right, #22d3ee, #2563eb) border-box',
+                  }}
                   className={cn(
                     "w-full py-3 px-4 rounded-lg font-semibold text-sm transition-all duration-200 cursor-pointer",
-                    "bg-linear-to-r from-blue-600 to-blue-700 text-white",
-                    "hover:from-blue-700 hover:to-blue-800 active:from-blue-800 active:to-blue-900",
+                    "border-2 border-transparent text-blue-500",
                     "disabled:opacity-50 disabled:cursor-not-allowed",
-                    "flex items-center justify-center gap-2",
-                    "shadow-sm hover:shadow"
+                    "flex items-center justify-center gap-2"
                   )}
                 >
                   {loadingAction === "passkey-login" ? (
@@ -289,13 +291,14 @@ export default function LandingPage() {
                 <button
                   onClick={handleEmailAuth}
                   disabled={!email.trim() || loadingAction !== null}
+                  style={{
+                    background: 'linear-gradient(white, white) padding-box, linear-gradient(to right, #22d3ee, #2563eb) border-box',
+                  }}
                   className={cn(
                     "w-full py-3 px-4 rounded-lg font-semibold text-sm transition-all duration-200 cursor-pointer",
-                    "bg-linear-to-r from-blue-600 to-blue-700 text-white",
-                    "hover:from-blue-700 hover:to-blue-800 active:from-blue-800 active:to-blue-900",
+                    "border-2 border-transparent text-blue-500",
                     "disabled:opacity-50 disabled:cursor-not-allowed",
-                    "flex items-center justify-center gap-2",
-                    "shadow-sm hover:shadow"
+                    "flex items-center justify-center gap-2"
                   )}
                 >
                   {loadingAction === "email" ? (
@@ -315,13 +318,14 @@ export default function LandingPage() {
                 <button
                   onClick={handleOTPSend}
                   disabled={!email.trim() || loadingAction !== null}
+                  style={{
+                    background: 'linear-gradient(white, white) padding-box, linear-gradient(to right, #22d3ee, #2563eb) border-box',
+                  }}
                   className={cn(
                     "w-full py-3 px-4 rounded-lg font-semibold text-sm transition-all duration-200 cursor-pointer",
-                    "bg-linear-to-r from-blue-600 to-blue-700 text-white",
-                    "hover:from-blue-700 hover:to-blue-800 active:from-blue-800 active:to-blue-900",
+                    "border-2 border-transparent text-blue-500",
                     "disabled:opacity-50 disabled:cursor-not-allowed",
-                    "flex items-center justify-center gap-2",
-                    "shadow-sm hover:shadow"
+                    "flex items-center justify-center gap-2"
                   )}
                 >
                   {loadingAction === "otp-send" ? (
@@ -344,13 +348,14 @@ export default function LandingPage() {
               <button
                 onClick={handleOTPVerify}
                 disabled={!otpCode.trim() || loadingAction !== null}
+                style={{
+                  background: 'linear-gradient(white, white) padding-box, linear-gradient(to right, #22d3ee, #2563eb) border-box',
+                }}
                 className={cn(
                   "w-full py-3 px-4 rounded-lg font-semibold text-sm transition-all duration-200 cursor-pointer",
-                  "bg-linear-to-r from-blue-600 to-blue-700 text-white",
-                  "hover:from-blue-700 hover:to-blue-800 active:from-blue-800 active:to-blue-900",
+                  "border-2 border-transparent text-blue-500",
                   "disabled:opacity-50 disabled:cursor-not-allowed",
-                  "flex items-center justify-center gap-2",
-                  "shadow-sm hover:shadow"
+                  "flex items-center justify-center gap-2"
                 )}
               >
                 {loadingAction === "otp-verify" ? (
@@ -383,13 +388,14 @@ export default function LandingPage() {
               <button
                 onClick={handleGoogleOAuth}
                 disabled={loadingAction !== null}
+                style={{
+                  background: 'linear-gradient(white, white) padding-box, linear-gradient(to right, #22d3ee, #2563eb) border-box',
+                }}
                 className={cn(
                   "w-full py-3.5 px-4 rounded-lg font-semibold text-[15px] transition-all duration-200 cursor-pointer",
-                  "bg-linear-to-r from-blue-600 to-blue-700 text-white",
-                  "hover:from-blue-700 hover:to-blue-800 active:from-blue-800 active:to-blue-900",
+                  "border-2 border-transparent text-blue-500",
                   "disabled:opacity-50 disabled:cursor-not-allowed",
-                  "flex items-center justify-center gap-2.5",
-                  "shadow-md hover:shadow-lg"
+                  "flex items-center justify-center gap-2.5"
                 )}
               >
                 {loadingAction === "oauth" ? (
@@ -414,7 +420,7 @@ export default function LandingPage() {
             {/* Terms Notification - Only show if not in OTP verify */}
             {otpStep === 'send' && (
               <p className="text-xs text-gray-500 text-left">
-                By continuing, you agree to our <a href="https://zerodev.app/terms-of-service" className="text-blue-600 hover:text-blue-700 underline">Terms of Service</a> and <a href="https://zerodev.app/privacy-policy" className="text-blue-600 hover:text-blue-700 underline">ZeroDev Privacy Policy</a>
+                By continuing, you agree to our <a href="https://zerodev.app/terms-of-service" className="text-blue-500 hover:text-blue-700 underline">Terms of Service</a> and <a href="https://zerodev.app/privacy-policy" className="text-blue-500 hover:text-blue-700 underline">ZeroDev Privacy Policy</a>
               </p>
             )}
           </div>

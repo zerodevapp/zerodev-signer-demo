@@ -149,7 +149,7 @@ export function SendTransactionTest() {
         <button
           onClick={() => { setMode("mint-nft"); setError(""); }}
           className={cn(
-            "flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all",
+            "flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all cursor-pointer",
             mode === "mint-nft" ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900"
           )}
         >
@@ -158,7 +158,7 @@ export function SendTransactionTest() {
         <button
           onClick={() => { setMode("send-eth"); setError(""); }}
           className={cn(
-            "flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all",
+            "flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all cursor-pointer",
             mode === "send-eth" ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900"
           )}
         >
@@ -170,13 +170,13 @@ export function SendTransactionTest() {
       {mode === "mint-nft" && (
         <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-100">
           <div>
-            <p className="text-xs font-medium text-blue-600 mb-1">Your NFT Balance</p>
+            <p className="text-xs font-medium text-blue-500 mb-1">Your NFT Balance</p>
             <p className="text-2xl font-bold text-blue-900">{nftBalance}</p>
           </div>
           <button
             onClick={fetchNftBalance}
             disabled={loadingBalance}
-            className="p-2 text-blue-600 hover:text-blue-700 disabled:opacity-50 transition-colors"
+            className="p-2 text-blue-500 hover:text-blue-700 disabled:opacity-50 transition-colors cursor-pointer"
             title="Refresh balance"
           >
             <RefreshCw className={cn("h-4 w-4", loadingBalance && "animate-spin")} />
@@ -186,7 +186,7 @@ export function SendTransactionTest() {
 
       {/* Gasless Info */}
       <div className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
-        <Sparkles className="h-4 w-4 text-blue-600 shrink-0 mt-0.5" />
+        <Sparkles className="h-4 w-4 text-blue-500 shrink-0 mt-0.5" />
         <div>
           <p className="text-sm font-medium text-blue-900">Gasless transactions are active</p>
           <p className="text-xs text-blue-700 mt-0.5">You have 10 free transactions remaining today.</p>
@@ -238,13 +238,14 @@ export function SendTransactionTest() {
       <button
         onClick={() => mode === "send-eth" ? handleSendEth() : handleMintNft()}
         disabled={loading || (mode === "send-eth" && !recipient)}
+        style={{
+          background: 'linear-gradient(white, white) padding-box, linear-gradient(to right, #22d3ee, #2563eb) border-box',
+        }}
         className={cn(
           "w-full py-3 px-4 rounded-lg font-semibold text-sm transition-all duration-200 cursor-pointer",
-          "bg-linear-to-r from-blue-600 to-blue-700 text-white",
-          "hover:from-blue-700 hover:to-blue-800 active:from-blue-800 active:to-blue-900",
+          "border-2 border-transparent text-blue-500",
           "disabled:opacity-50 disabled:cursor-not-allowed",
-          "flex items-center justify-center gap-2",
-          "shadow-sm hover:shadow"
+          "flex items-center justify-center gap-2"
         )}
       >
         {loading ? (
@@ -306,7 +307,7 @@ export function SendTransactionTest() {
               <p className="text-sm text-blue-700">
                 NFT minted to your wallet!
               </p>
-              <p className="text-xs text-blue-600 mt-1">Balance will update in a few seconds...</p>
+              <p className="text-xs text-blue-500 mt-1">Balance will update in a few seconds...</p>
             </div>
           )}
         </div>
