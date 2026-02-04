@@ -32,7 +32,7 @@ const tabs = [
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<ActiveTab>("signing");
+  const [activeTab, setActiveTab] = useState<ActiveTab>("transaction");
   const [balance, setBalance] = useState<string>("0");
   const [copied, setCopied] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
