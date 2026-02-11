@@ -15,10 +15,9 @@ function VerifyContent() {
       const otp = searchParams.get('otp')
       console.log('otp', otp)
       const otpId = localStorage.getItem("otpId");
-      const subOrganizationId = localStorage.getItem("subOrganizationId");
-      if (!otpId || !subOrganizationId) {
+      if (!otpId) {
         setVerificationState('error');
-        setErrorMessage('No OTP ID or subOrganization ID found');
+        setErrorMessage('No OTP ID found');
         return;
       }
 
@@ -35,7 +34,6 @@ function VerifyContent() {
         await verifyOTP.mutateAsync({
           code: otp,
           otpId,
-          subOrganizationId,
         });
 
         setVerificationState('success');
