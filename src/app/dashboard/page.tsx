@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { createPublicClient, http, formatEther, Address, isAddress } from "viem";
+import { formatEther, Address, isAddress } from "viem";
 import { useAccount, useDisconnect, usePublicClient } from "wagmi";
 
 export const dynamic = 'force-dynamic';
