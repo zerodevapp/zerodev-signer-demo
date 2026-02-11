@@ -100,7 +100,7 @@ export function SigningTest() {
         <button
           onClick={() => { setMode("message"); setPayload("Hello World"); }}
           className={cn(
-            "flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all",
+            "flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all cursor-pointer",
             mode === "message" ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900"
           )}
         >
@@ -109,7 +109,7 @@ export function SigningTest() {
         <button
           onClick={() => { setMode("typedData"); setPayload(JSON.stringify(typedData, null, 2)); }}
           className={cn(
-            "flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all",
+            "flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all cursor-pointer",
             mode === "typedData" ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900"
           )}
         >
@@ -125,7 +125,7 @@ export function SigningTest() {
           </label>
           <button
             onClick={loadSample}
-            className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
+            className="text-sm text-blue-500 hover:text-blue-700 font-medium flex items-center gap-1 cursor-pointer"
           >
             <Sparkles className="h-3.5 w-3.5" />
             Load Sample
@@ -148,13 +148,14 @@ export function SigningTest() {
       <button
         onClick={handleSign}
         disabled={loading || !payload.trim() || !address}
+        style={{
+          background: 'linear-gradient(white, white) padding-box, linear-gradient(to right, #22d3ee, #2563eb) border-box',
+        }}
         className={cn(
           "w-full py-3 px-4 rounded-lg font-semibold text-sm transition-all duration-200 cursor-pointer",
-          "bg-linear-to-r from-blue-600 to-blue-700 text-white",
-          "hover:from-blue-700 hover:to-blue-800 active:from-blue-800 active:to-blue-900",
+          "border-2 border-transparent text-blue-500",
           "disabled:opacity-50 disabled:cursor-not-allowed",
-          "flex items-center justify-center gap-2",
-          "shadow-sm hover:shadow"
+          "flex items-center justify-center gap-2"
         )}
       >
         {loading ? (

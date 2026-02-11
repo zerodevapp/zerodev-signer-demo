@@ -30,7 +30,7 @@ export function ExportWalletModal({ isOpen, onClose }: ExportWalletModalProps) {
     } catch (err) {
       console.error("Export error:", err);
       setShowWarning(true);
-      setExporting(true);
+      setExporting(false);
     }
   };
 
@@ -53,7 +53,7 @@ export function ExportWalletModal({ isOpen, onClose }: ExportWalletModalProps) {
           </div>
           <button
             onClick={handleClose}
-            className="text-gray-400 hover:text-gray-600 p-1"
+            className="text-gray-400 hover:text-gray-600 p-1 cursor-pointer"
           >
             <X className="h-5 w-5" />
           </button>
@@ -87,9 +87,12 @@ export function ExportWalletModal({ isOpen, onClose }: ExportWalletModalProps) {
               <button
                 onClick={handleExport}
                 disabled={exportWallet.isPending}
+                style={{
+                  background: 'linear-gradient(white, white) padding-box, linear-gradient(to right, #22d3ee, #2563eb) border-box',
+                }}
                 className={cn(
-                  "w-full py-3 px-4 rounded-lg font-semibold text-sm",
-                  "bg-red-600 text-white hover:bg-red-700",
+                  "w-full py-3 px-4 rounded-lg font-semibold text-sm cursor-pointer",
+                  "border-2 border-transparent text-blue-500",
                   "disabled:opacity-50 disabled:cursor-not-allowed",
                   "flex items-center justify-center gap-2"
                 )}
@@ -111,7 +114,7 @@ export function ExportWalletModal({ isOpen, onClose }: ExportWalletModalProps) {
             <div className="space-y-4">
               <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
                 <p className="text-sm text-blue-800 font-medium mb-2">Your Seed Phrase</p>
-                <p className="text-xs text-blue-600">
+                <p className="text-xs text-blue-500">
                   Write this down and store it safely. You&apos;ll need it to recover your wallet.
                 </p>
               </div>
@@ -119,7 +122,7 @@ export function ExportWalletModal({ isOpen, onClose }: ExportWalletModalProps) {
               {/* Iframe Container - This will show the seed phrase */}
               <div
                 id={iframeContainerId}
-                className="min-h-[300px] border-2 border-gray-200 rounded-lg bg-gray-50 p-4"
+                className="min-h-[300px] border-2 border-gray-200 rounded-lg bg-white p-4 overflow-auto"
               >
                 {/* Turnkey iframe will inject content here */}
               </div>
@@ -149,7 +152,7 @@ export function ExportWalletModal({ isOpen, onClose }: ExportWalletModalProps) {
         <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
           <button
             onClick={handleClose}
-            className="w-full py-2.5 px-4 rounded-lg font-medium text-sm border border-gray-200 bg-white text-gray-900 hover:bg-gray-50 transition-colors"
+            className="w-full py-2.5 px-4 rounded-lg font-medium text-sm border border-gray-200 bg-white text-gray-900 hover:bg-gray-50 transition-colors cursor-pointer"
           >
             Close
           </button>
