@@ -8,12 +8,20 @@
     "start": "next start",
     "lint": "next lint"
   },
+  "dependenciesMeta": {
+    "@zerodev/wallet-core": {
+      "injected": true
+    },
+    "@zerodev/wallet-react": {
+      "injected": true
+    }
+  },
   "dependencies": {
     "@tanstack/react-query": "^5.0.0",
     "@wagmi/core": "^2.22.0",
     "@zerodev/sdk": "^5.0.0",
-    "@zerodev/wallet-core": "0.0.1-alpha.5",
-    "@zerodev/wallet-react": "0.0.1-alpha.4",
+    "@zerodev/wallet-core": "0.0.1-alpha.7",
+    "@zerodev/wallet-react": "0.0.1-alpha.7",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.545.0",
@@ -39,5 +47,7 @@
     "tailwindcss": "^4",
     "typescript": "~5.9.2"
   },
-  "workspaces": []
+  "workspaces": [
+    "src"
+  ]
 }

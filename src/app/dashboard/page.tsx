@@ -3,9 +3,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { createPublicClient, http, formatEther, Address, isAddress } from "viem";
-import { sepolia } from "viem/chains";
-import { useAccount, useDisconnect } from "wagmi";
+import { formatEther, Address, isAddress } from "viem";
+import { useAccount, useDisconnect, usePublicClient } from "wagmi";
 
 export const dynamic = 'force-dynamic';
 import {
@@ -16,12 +15,15 @@ import {
   LogOut,
   Loader2,
   Check,
-  Upload
+  Upload,
+  Key
 } from "lucide-react";
 import { cn } from "../lib/utils";
 import { SigningTest } from "../components/SigningTest";
 import { SendTransactionTest } from "../components/SendTransactionTest";
 import { ExportWalletModal } from "../components/ExportWalletModal";
+import { ExportPrivateKeyModal } from "../components/ExportPrivateKeyModal";
+import { ChainSelector } from "../components/ChainSelector";
 
 type ActiveTab = "signing" | "transaction";
 
@@ -36,19 +38,19 @@ export default function DashboardPage() {
   const [balance, setBalance] = useState<string>("0");
   const [copied, setCopied] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
+  const [showExportPrivateKeyModal, setShowExportPrivateKeyModal] = useState(false);
 
   // Wagmi hooks
-  const { address, status } = useAccount();
+  const { address, status, chain } = useAccount();
+  const publicClient = usePublicClient({chainId: chain?.id});
   const {disconnectAsync: logout} = useDisconnect();
+
 
   useEffect(() => {
     const loadBalance = async () => {
       if (address && isAddress(address)) {
         try {
-          const publicClient = createPublicClient({
-            chain: sepolia,
-            transport: http(process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL),
-          });
+          if (!publicClient) return;
           const balanceWei = await publicClient.getBalance({ address: address as Address });
           setBalance(formatEther(balanceWei));
         } catch (err) {
@@ -58,7 +60,7 @@ export default function DashboardPage() {
       }
     };
     loadBalance();
-  }, [address]);
+  }, [address, chain, publicClient]);
 
   const handleCopy = async () => {
     if (!address) return;
@@ -94,6 +96,7 @@ export default function DashboardPage() {
   return (
     <>
       <ExportWalletModal isOpen={showExportModal} onClose={() => setShowExportModal(false)} />
+      <ExportPrivateKeyModal isOpen={showExportPrivateKeyModal} onClose={() => setShowExportPrivateKeyModal(false)} />
       <div className="min-h-screen bg-white">
         {/* Header */}
         <header className="bg-white border-b border-gray-100">
@@ -117,6 +120,7 @@ export default function DashboardPage() {
 
               {/* Wallet Address & Actions */}
               <div className="flex items-center gap-3">
+                <ChainSelector />
                 <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-200 group cursor-pointer">
                   <Wallet className="h-4 w-4 text-gray-500" />
                   <span className="text-sm font-mono text-gray-700">{formatAddress(address)}</span>
@@ -153,17 +157,32 @@ export default function DashboardPage() {
                 <Wallet className="h-5 w-5 text-gray-700" />
                 <h1 className="text-lg font-semibold text-gray-900">Default Wallet</h1>
               </div>
-              <button
-                onClick={() => setShowExportModal(true)}
-                className={cn(
-                  "px-3 py-1.5 rounded-lg text-sm font-medium transition-all cursor-pointer",
-                  "border border-gray-200 text-gray-700 hover:bg-gray-50",
-                  "flex items-center gap-2"
-                )}
-              >
-                <Upload className="h-4 w-4" />
-                <span className="hidden sm:inline">Export</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setShowExportModal(true)}
+                  className={cn(
+                    "px-3 py-1.5 rounded-lg text-sm font-medium transition-all cursor-pointer",
+                    "border border-gray-200 text-gray-700 hover:bg-gray-50",
+                    "flex items-center gap-2"
+                  )}
+                  title="Export Seed Phrase"
+                >
+                  <Upload className="h-4 w-4" />
+                  <span className="hidden sm:inline">Seed Phrase</span>
+                </button>
+                <button
+                  onClick={() => setShowExportPrivateKeyModal(true)}
+                  className={cn(
+                    "px-3 py-1.5 rounded-lg text-sm font-medium transition-all cursor-pointer",
+                    "border border-gray-200 text-gray-700 hover:bg-gray-50",
+                    "flex items-center gap-2"
+                  )}
+                  title="Export Private Key"
+                >
+                  <Key className="h-4 w-4" />
+                  <span className="hidden sm:inline">Private Key</span>
+                </button>
+              </div>
             </div>
             <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
               <span className="font-mono text-xs sm:text-sm break-all">{address}</span>
@@ -183,7 +202,7 @@ export default function DashboardPage() {
               <span className="text-3xl font-bold text-gray-900">{parseFloat(balance).toFixed(4)}</span>
               <span className="text-lg text-gray-500 font-medium">ETH</span>
             </div>
-            <p className="text-sm text-gray-500 mt-1">Sepolia Testnet</p>
+            <p className="text-sm text-gray-500 mt-1">{chain?.name} Testnet</p>
           </div>
 
           {/* Tabs */}

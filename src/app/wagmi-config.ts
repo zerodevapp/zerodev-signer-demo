@@ -1,24 +1,27 @@
 'use client'
 
 import { createConfig, http } from 'wagmi'
-import { sepolia } from 'wagmi/chains'
+import { sepolia, baseSepolia } from 'wagmi/chains'
 import { zeroDevWallet } from '@zerodev/wallet-react'
 
+// RPC URLs per chain
+const rpcUrls: Record<number, string | undefined> = {
+  [sepolia.id]: process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL,
+  [baseSepolia.id]: process.env.NEXT_PUBLIC_BASE_SEPOLIA_RPC_URL,
+}
+
 export const config = createConfig({
-  chains: [sepolia],
+  chains: [sepolia, baseSepolia],
   connectors: [
     zeroDevWallet({
       projectId: process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID!,
-      aaUrl: process.env.NEXT_PUBLIC_ZERODEV_RPC_URL!,
-      chains: [sepolia],
-      oauthConfig: {
-        googleClientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-        redirectUri: `${process.env.NEXT_PUBLIC_APP_URL || (typeof window !== 'undefined' ? window.location.origin : '')}`,
-      },
+      proxyBaseUrl: process.env.NEXT_PUBLIC_KMS_PROXY_BASE_URL!,
+      chains: [sepolia, baseSepolia],
     })
   ],
   ssr: true,
   transports: {
-    [sepolia.id]: http(process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL),
+    [sepolia.id]: http(rpcUrls[sepolia.id]),
+    [baseSepolia.id]: http(rpcUrls[baseSepolia.id]),
   },
 })

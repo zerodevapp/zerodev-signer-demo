@@ -5,15 +5,12 @@ import { Send, Sparkles, AlertCircle, Loader2, Check, ExternalLink, RefreshCw } 
 import { cn } from "../lib/utils";
 import {
   type Address,
-  createPublicClient,
-  http,
   parseEther,
   parseAbi,
   zeroAddress,
   isAddress,
 } from "viem";
-import { sepolia } from "viem/chains";
-import { useAccount, useSendTransaction, useWriteContract } from "wagmi";
+import { useAccount, useSendTransaction, useWriteContract, usePublicClient } from "wagmi";
 
 type TransactionMode = "send-eth" | "mint-nft";
 
@@ -32,7 +29,8 @@ export function SendTransactionTest() {
   const [loadingBalance, setLoadingBalance] = useState(false);
 
   // Wagmi hooks
-  const { address, isConnected } = useAccount();
+  const { address, isConnected, chain } = useAccount();
+  const publicClient = usePublicClient({chainId: chain?.id});
   const { sendTransaction, isPending: isSendingTx, data: sendTxHash } = useSendTransaction();
   const { writeContract, isPending: isMinting, data: mintTxHash,error: mintError } = useWriteContract();
 
@@ -45,12 +43,8 @@ export function SendTransactionTest() {
 
     setLoadingBalance(true);
     try {
-      const publicClient = createPublicClient({
-        chain: sepolia,
-        transport: http(process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL),
-      });
-
-      const balance = await publicClient.readContract({
+      if (!publicClient) return;
+      const balance = await publicClient?.readContract({
         address: NFT_CONTRACT_ADDRESS,
         abi: NFT_CONTRACT_ABI,
         functionName: "balanceOf",
@@ -65,13 +59,13 @@ export function SendTransactionTest() {
     }
   };
 
-  // Fetch balance when switching to NFT mode
+  // Fetch balance when switching to NFT mode or chain changes
   useEffect(() => {
     if (mode === "mint-nft" && isConnected) {
       fetchNftBalance();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode, isConnected]);
+  }, [mode, isConnected, publicClient]);
 
   const handleSendEth = async () => {
     if (!isConnected || !address || !recipient) {
@@ -92,7 +86,7 @@ export function SendTransactionTest() {
 
     try {
       // Use Wagmi's useSendTransaction - provider handles gasless via EIP-7702
-      sendTransaction({
+      await sendTransaction({
         to: recipient as Address,
         value: parseEther(amount || "0"),
       });
@@ -140,7 +134,7 @@ export function SendTransactionTest() {
       <div>
         <h2 className="text-lg font-semibold text-gray-900">Send Transaction</h2>
         <p className="text-sm text-gray-500 mt-1">
-          Send ETH or mint NFTs on Sepolia testnet
+          Send ETH or mint NFTs on {chain?.name}
         </p>
       </div>
 
@@ -291,7 +285,7 @@ export function SendTransactionTest() {
             </span>
           </div>
           <a
-            href={`https://sepolia.etherscan.io/tx/${result}`}
+            href={`${chain?.blockExplorers?.default?.url}/tx/${result}`}
             target="_blank"
             rel="noopener noreferrer"
             className={cn(
@@ -299,7 +293,7 @@ export function SendTransactionTest() {
               "hover:bg-gray-100 transition-colors group"
             )}
           >
-            <span className="text-sm text-gray-700 font-medium">View on Etherscan</span>
+            <span className="text-sm text-gray-700 font-medium">View on Explorer</span>
             <ExternalLink className="h-4 w-4 text-gray-400 group-hover:text-gray-600" />
           </a>
           {mode === "mint-nft" && (

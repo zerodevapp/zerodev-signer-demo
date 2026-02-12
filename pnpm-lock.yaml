@@ -18,11 +18,11 @@ importers:
         specifier: ^5.0.0
         version: 5.5.3(viem@2.38.6(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))
       '@zerodev/wallet-core':
-        specifier: 0.0.1-alpha.5
-        version: 0.0.1-alpha.5(viem@2.38.6(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))
+        specifier: 0.0.1-alpha.7
+        version: 0.0.1-alpha.7(viem@2.38.6(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))
       '@zerodev/wallet-react':
-        specifier: 0.0.1-alpha.4
-        version: 0.0.1-alpha.4(3a7b5cdb3d718fdc235c47afd55a985a)
+        specifier: 0.0.1-alpha.7
+        version: 0.0.1-alpha.7(2b93f183f49a7537f5566816d827923d)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -56,6 +56,11 @@ importers:
       zustand:
         specifier: ^5.0.3
         version: 5.0.9(@types/react@19.2.2)(react@19.2.3)(use-sync-external-store@1.4.0(react@19.2.3))
+    dependenciesMeta:
+      '@zerodev/wallet-core':
+        injected: true
+      '@zerodev/wallet-react':
+        injected: true
     devDependencies:
       '@eslint/eslintrc':
         specifier: ^3
@@ -1369,18 +1374,18 @@ packages:
     peerDependencies:
       viem: ^2.28.0
 
-  '@zerodev/wallet-core@0.0.1-alpha.5':
-    resolution: {integrity: sha512-zmyGN3qvNo0WQboS9a83qfrkY1S7Gb/DiYw9sc4+lqMb1MU70v1Y/t1r6u6dFmBOKDaPjDDe0w9yYpIM4kpkrA==}
+  '@zerodev/wallet-core@0.0.1-alpha.7':
+    resolution: {integrity: sha512-DInfMVVzEsxnhW7QaJwYfqWRuHZ88KNT0T7zf+umzimbPBtKEZdCqfQ1bK240oc5kZJhCYXlbl4IqDNya8w1bg==}
     peerDependencies:
       viem: ^2.38.0
 
-  '@zerodev/wallet-react@0.0.1-alpha.4':
-    resolution: {integrity: sha512-YSXLo3EwRs2Ox7OsvlGjlycnBVxnjNNmJrJ+sZCUOBR+KFnsfF93wPRuCEstiIEvnlsGAlyag6dMQusFBU+oSg==}
+  '@zerodev/wallet-react@0.0.1-alpha.7':
+    resolution: {integrity: sha512-IIhVY+Sj21WNfMHtzOwg14a8qvOWTbp8dBAxgEPitaWH8YY40FWMHuyHIvdblnMUiXslirQ4gwAhDpugA2c+Vw==}
     peerDependencies:
       '@tanstack/react-query': ^5.0.0
       '@wagmi/core': ^2.22.0
       '@zerodev/sdk': 5.5.4
-      '@zerodev/wallet-core': 0.0.1-alpha.5
+      '@zerodev/wallet-core': 0.0.1-alpha.7
       ox: ^0.3.0
       react: ^18.0.0 || ^19.0.0
       viem: ^2.38.0
@@ -2431,6 +2436,9 @@ packages:
 
   json-buffer@3.0.1:
     resolution: {integrity: sha512-4bV5BfR2mqfQTJm+V5tPPdf+ZpuhiIvTuAB5g8kcrXOZpTT/QwwVRWBywX1ozr6lEuPdbHxwaJlm9G6mI2sfSQ==}
+
+  json-canonicalize@2.0.0:
+    resolution: {integrity: sha512-yyrnK/mEm6Na3ChbJUWueXdapueW0p380RUyTW87XGb1ww8l8hU0pRrGC3vSWHe9CxrbPHX2fGUOZpNiHR0IIg==}
 
   json-rpc-engine@6.1.0:
     resolution: {integrity: sha512-NEdLrtrq1jUZyfjkr9OCz9EzCNhnRyWtt1PAnvnhwy6e8XETS0Dtc+ZNCO2gvuAoKsIn2+vCSowXTYE4CkgnAQ==}
@@ -5948,22 +5956,23 @@ snapshots:
       semver: 7.7.3
       viem: 2.38.6(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1)
 
-  '@zerodev/wallet-core@0.0.1-alpha.5(viem@2.38.6(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))':
+  '@zerodev/wallet-core@0.0.1-alpha.7(viem@2.38.6(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))':
     dependencies:
       '@turnkey/http': 3.13.0
       '@turnkey/iframe-stamper': 2.7.0
       '@turnkey/indexed-db-stamper': 1.2.0
       '@turnkey/webauthn-stamper': 0.6.0
+      json-canonicalize: 2.0.0
       viem: 2.38.6(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1)
     transitivePeerDependencies:
       - encoding
 
-  '@zerodev/wallet-react@0.0.1-alpha.4(3a7b5cdb3d718fdc235c47afd55a985a)':
+  '@zerodev/wallet-react@0.0.1-alpha.7(2b93f183f49a7537f5566816d827923d)':
     dependencies:
       '@tanstack/react-query': 5.90.12(react@19.2.3)
       '@wagmi/core': 2.22.1(@tanstack/query-core@5.90.12)(@types/react@19.2.2)(react@19.2.3)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.2.3))(viem@2.38.6(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))
       '@zerodev/sdk': 5.5.3(viem@2.38.6(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))
-      '@zerodev/wallet-core': 0.0.1-alpha.5(viem@2.38.6(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))
+      '@zerodev/wallet-core': 0.0.1-alpha.7(viem@2.38.6(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))
       ox: 0.9.17(typescript@5.9.3)(zod@4.2.1)
       react: 19.2.3
       viem: 2.38.6(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1)
@@ -7185,6 +7194,8 @@ snapshots:
       argparse: 2.0.1
 
   json-buffer@3.0.1: {}
+
+  json-canonicalize@2.0.0: {}
 
   json-rpc-engine@6.1.0:
     dependencies:
