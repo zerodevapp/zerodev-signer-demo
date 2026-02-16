@@ -1,7 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { getUserEmail } from "@zerodev/wallet-react/dist/_types/actions";
+import { useMutation } from "@tanstack/react-query";
+import { useGetUserEmail } from "@zerodev/wallet-react";
 import {
   Check,
   Copy,
@@ -14,9 +15,9 @@ import {
   Wallet
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Address, formatEther, isAddress } from "viem";
-import { useAccount, useConnectorClient, useDisconnect, usePublicClient } from "wagmi";
+import { useAccount, useDisconnect, usePublicClient } from "wagmi";
 import { ChainSelector } from "../components/ChainSelector";
 import { ExportPrivateKeyModal } from "../components/ExportPrivateKeyModal";
 import { ExportWalletModal } from "../components/ExportWalletModal";
@@ -24,7 +25,6 @@ import { SendTransactionTest } from "../components/SendTransactionTest";
 import { SigningTest } from "../components/SigningTest";
 import { submitToHubSpot } from "../lib/hubspot";
 import { cn } from "../lib/utils";
-import { config } from "../wagmi-config";
 
 export const dynamic = 'force-dynamic';
 
@@ -45,19 +45,28 @@ export default function DashboardPage() {
 
   // Wagmi hooks
   const { address, status, chain, } = useAccount();
-  const { data: connector } = useConnectorClient();
   const publicClient = usePublicClient({ chainId: chain?.id });
   const { disconnectAsync: logout } = useDisconnect();
+  const { data: userEmail } = useGetUserEmail({})
 
-  const submitMarketingConsent = useCallback(async () => {
-    // @ts-expect-error - getStore is available on the ZeroDev connector 
-    const store = await (connector).getStore()
-    const session = store.getState().session
+  const { mutate: submitMarketingConsent } = useMutation(
+    {
+      mutationKey: ["submitMarketingConsent"],
+      mutationFn: async () => {
+        const email = userEmail?.email
+        if (!email) {
+          console.warn("Dashboard: No email found for marketing consent");
+          return;
+        }
 
-    const { email } = await getUserEmail(config, { organizationId: session.organizationId, projectId: process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID || '' })
-    await submitToHubSpot(email, true)
-    localStorage.removeItem("marketingConsent")
-  }, [connector]);
+        await submitToHubSpot(email, true)
+      },
+      onSettled: () => {
+        // No matter the result, we consider the consent process complete and remove the localStorage item
+        localStorage.removeItem("marketingConsent")
+      }
+    }
+  )
 
   // Submit marketing consent to HubSpot after login
   useEffect(() => {
