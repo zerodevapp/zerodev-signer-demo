@@ -1,29 +1,32 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useState, useEffect } from "react";
+import { getUserEmail } from "@zerodev/wallet-react/dist/_types/actions";
+import {
+  Check,
+  Copy,
+  FileSignature,
+  Key,
+  Loader2,
+  LogOut,
+  Send,
+  Upload,
+  Wallet
+} from "lucide-react";
 import { useRouter } from "next/navigation";
-import { formatEther, Address, isAddress } from "viem";
-import { useAccount, useDisconnect, usePublicClient } from "wagmi";
+import { useCallback, useEffect, useState } from "react";
+import { Address, formatEther, isAddress } from "viem";
+import { useAccount, useConnectorClient, useDisconnect, usePublicClient } from "wagmi";
+import { ChainSelector } from "../components/ChainSelector";
+import { ExportPrivateKeyModal } from "../components/ExportPrivateKeyModal";
+import { ExportWalletModal } from "../components/ExportWalletModal";
+import { SendTransactionTest } from "../components/SendTransactionTest";
+import { SigningTest } from "../components/SigningTest";
+import { submitToHubSpot } from "../lib/hubspot";
+import { cn } from "../lib/utils";
+import { config } from "../wagmi-config";
 
 export const dynamic = 'force-dynamic';
-import {
-  FileSignature,
-  Send,
-  Wallet,
-  Copy,
-  LogOut,
-  Loader2,
-  Check,
-  Upload,
-  Key
-} from "lucide-react";
-import { cn } from "../lib/utils";
-import { SigningTest } from "../components/SigningTest";
-import { SendTransactionTest } from "../components/SendTransactionTest";
-import { ExportWalletModal } from "../components/ExportWalletModal";
-import { ExportPrivateKeyModal } from "../components/ExportPrivateKeyModal";
-import { ChainSelector } from "../components/ChainSelector";
 
 type ActiveTab = "signing" | "transaction";
 
@@ -41,10 +44,28 @@ export default function DashboardPage() {
   const [showExportPrivateKeyModal, setShowExportPrivateKeyModal] = useState(false);
 
   // Wagmi hooks
-  const { address, status, chain } = useAccount();
-  const publicClient = usePublicClient({chainId: chain?.id});
-  const {disconnectAsync: logout} = useDisconnect();
+  const { address, status, chain, } = useAccount();
+  const { data: connector } = useConnectorClient();
+  const publicClient = usePublicClient({ chainId: chain?.id });
+  const { disconnectAsync: logout } = useDisconnect();
 
+  const submitMarketingConsent = useCallback(async () => {
+    // @ts-expect-error - getStore is available on the ZeroDev connector 
+    const store = await (connector).getStore()
+    const session = store.getState().session
+
+    const { email } = await getUserEmail(config, { organizationId: session.organizationId, projectId: process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID || '' })
+    await submitToHubSpot(email, true)
+    localStorage.removeItem("marketingConsent")
+  }, [connector]);
+
+  // Submit marketing consent to HubSpot after login
+  useEffect(() => {
+    const consent = localStorage.getItem("marketingConsent");
+    if (consent !== null && (consent === 'true')) {
+      submitMarketingConsent();
+    }
+  }, [submitMarketingConsent]);
 
   useEffect(() => {
     const loadBalance = async () => {
