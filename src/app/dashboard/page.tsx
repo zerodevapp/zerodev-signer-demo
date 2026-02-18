@@ -47,15 +47,14 @@ export default function DashboardPage() {
   const { address, status, chain, } = useAccount();
   const publicClient = usePublicClient({ chainId: chain?.id });
   const { disconnectAsync: logout } = useDisconnect();
-  const { data: userEmail } = useGetUserEmail({})
+  const { data: userEmail, isLoading: isUserEmailLoading } = useGetUserEmail({})
 
   const { mutate: submitMarketingConsent } = useMutation(
     {
-      mutationKey: ["submitMarketingConsent"],
+      mutationKey: ["submitMarketingConsent", userEmail?.email],
       mutationFn: async () => {
         const email = userEmail?.email
         if (!email) {
-          console.warn("Dashboard: No email found for marketing consent");
           return;
         }
 
@@ -70,11 +69,18 @@ export default function DashboardPage() {
 
   // Submit marketing consent to HubSpot after login
   useEffect(() => {
+    if(isUserEmailLoading) {
+      return;
+    }
+    if(!userEmail?.email) {
+      console.warn("Dashboard: User email not available, skipping marketing consent submission");
+      return;
+    }
     const consent = localStorage.getItem("marketingConsent");
     if (consent !== null && (consent === 'true')) {
       submitMarketingConsent();
     }
-  }, [submitMarketingConsent]);
+  }, [submitMarketingConsent, userEmail, isUserEmailLoading]);
 
   useEffect(() => {
     const loadBalance = async () => {
