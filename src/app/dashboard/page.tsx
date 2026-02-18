@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useGetUserEmail } from "@zerodev/wallet-react";
 import {
   Check,
@@ -49,7 +49,7 @@ export default function DashboardPage() {
   const { disconnectAsync: logout } = useDisconnect();
   const { data: userEmail, isLoading: isUserEmailLoading } = useGetUserEmail({})
 
-  const { mutate: submitMarketingConsent } = useMutation(
+  const { mutate: submitMarketingConsent, isPending: isSubmittingMarketingConsent } = useMutation(
     {
       mutationKey: ["submitMarketingConsent", userEmail?.email],
       mutationFn: async () => {
@@ -59,6 +59,7 @@ export default function DashboardPage() {
         }
 
         await submitToHubSpot(email, true)
+        return true
       },
       onSettled: () => {
         // No matter the result, we consider the consent process complete and remove the localStorage item
@@ -66,10 +67,11 @@ export default function DashboardPage() {
       }
     }
   )
+  const queryClient = useQueryClient()
 
   // Submit marketing consent to HubSpot after login
   useEffect(() => {
-    if(isUserEmailLoading) {
+    if(isUserEmailLoading || isSubmittingMarketingConsent) {
       return;
     }
     if(!userEmail?.email) {
@@ -80,7 +82,7 @@ export default function DashboardPage() {
     if (consent !== null && (consent === 'true')) {
       submitMarketingConsent();
     }
-  }, [submitMarketingConsent, userEmail, isUserEmailLoading]);
+  }, [submitMarketingConsent, userEmail, isUserEmailLoading, queryClient, isSubmittingMarketingConsent]);
 
   useEffect(() => {
     const loadBalance = async () => {
