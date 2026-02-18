@@ -1,29 +1,32 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useState, useEffect } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { useGetUserEmail } from "@zerodev/wallet-react";
+import {
+  Check,
+  Copy,
+  FileSignature,
+  Key,
+  Loader2,
+  LogOut,
+  Send,
+  Upload,
+  Wallet
+} from "lucide-react";
 import { useRouter } from "next/navigation";
-import { formatEther, Address, isAddress } from "viem";
+import { useEffect, useState } from "react";
+import { Address, formatEther, isAddress } from "viem";
 import { useAccount, useDisconnect, usePublicClient } from "wagmi";
+import { ChainSelector } from "../components/ChainSelector";
+import { ExportPrivateKeyModal } from "../components/ExportPrivateKeyModal";
+import { ExportWalletModal } from "../components/ExportWalletModal";
+import { SendTransactionTest } from "../components/SendTransactionTest";
+import { SigningTest } from "../components/SigningTest";
+import { submitToHubSpot } from "../lib/hubspot";
+import { cn } from "../lib/utils";
 
 export const dynamic = 'force-dynamic';
-import {
-  FileSignature,
-  Send,
-  Wallet,
-  Copy,
-  LogOut,
-  Loader2,
-  Check,
-  Upload,
-  Key
-} from "lucide-react";
-import { cn } from "../lib/utils";
-import { SigningTest } from "../components/SigningTest";
-import { SendTransactionTest } from "../components/SendTransactionTest";
-import { ExportWalletModal } from "../components/ExportWalletModal";
-import { ExportPrivateKeyModal } from "../components/ExportPrivateKeyModal";
-import { ChainSelector } from "../components/ChainSelector";
 
 type ActiveTab = "signing" | "transaction";
 
@@ -41,10 +44,37 @@ export default function DashboardPage() {
   const [showExportPrivateKeyModal, setShowExportPrivateKeyModal] = useState(false);
 
   // Wagmi hooks
-  const { address, status, chain } = useAccount();
-  const publicClient = usePublicClient({chainId: chain?.id});
-  const {disconnectAsync: logout} = useDisconnect();
+  const { address, status, chain, } = useAccount();
+  const publicClient = usePublicClient({ chainId: chain?.id });
+  const { disconnectAsync: logout } = useDisconnect();
+  const { data: userEmail } = useGetUserEmail({})
 
+  const { mutate: submitMarketingConsent } = useMutation(
+    {
+      mutationKey: ["submitMarketingConsent"],
+      mutationFn: async () => {
+        const email = userEmail?.email
+        if (!email) {
+          console.warn("Dashboard: No email found for marketing consent");
+          return;
+        }
+
+        await submitToHubSpot(email, true)
+      },
+      onSettled: () => {
+        // No matter the result, we consider the consent process complete and remove the localStorage item
+        localStorage.removeItem("marketingConsent")
+      }
+    }
+  )
+
+  // Submit marketing consent to HubSpot after login
+  useEffect(() => {
+    const consent = localStorage.getItem("marketingConsent");
+    if (consent !== null && (consent === 'true')) {
+      submitMarketingConsent();
+    }
+  }, [submitMarketingConsent]);
 
   useEffect(() => {
     const loadBalance = async () => {
