@@ -1,18 +1,18 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { Mail, KeyRound, Loader2 } from "lucide-react";
-import { cn } from "./lib/utils";
 import {
-  useRegisterPasskey,
-  useLoginPasskey,
+  OAUTH_PROVIDERS,
   useAuthenticateOAuth,
+  useLoginPasskey,
+  useRegisterPasskey,
   useSendOTP,
   useVerifyOTP,
-  OAUTH_PROVIDERS,
 } from "@zerodev/wallet-react";
+import { KeyRound, Loader2, Mail } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { cn } from "./lib/utils";
 
 export const dynamic = 'force-dynamic';
 
