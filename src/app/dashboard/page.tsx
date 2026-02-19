@@ -61,10 +61,6 @@ export default function DashboardPage() {
         await submitToHubSpot(email, true)
         return true
       },
-      onSettled: () => {
-        // No matter the result, we consider the consent process complete and remove the localStorage item
-        localStorage.removeItem("marketingConsent")
-      }
     }
   )
   const queryClient = useQueryClient()
@@ -75,13 +71,11 @@ export default function DashboardPage() {
       return;
     }
     if(!userEmail?.email) {
-      console.warn("Dashboard: User email not available, skipping marketing consent submission");
+      console.warn("User email not available");
       return;
     }
-    const consent = localStorage.getItem("marketingConsent");
-    if (consent !== null && (consent === 'true')) {
-      submitMarketingConsent();
-    }
+    
+    submitMarketingConsent();
   }, [submitMarketingConsent, userEmail, isUserEmailLoading, queryClient, isSubmittingMarketingConsent]);
 
   useEffect(() => {

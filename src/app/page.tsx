@@ -29,14 +29,6 @@ export default function LandingPage() {
   const [otpCode, setOtpCode] = useState("");
   const [otpData, setOtpData] = useState<{ otpId: string;} | null>(null);
 
-  // Marketing consent state
-  const [marketingConsent, setMarketingConsent] = useState(true);
-
-  // Reset marketing consent on new login attempt (default to true)
-  useEffect(() => {
-    localStorage.setItem("marketingConsent", "true");
-  }, []);
-
   const registerPasskey = useRegisterPasskey();
   const loginPasskey = useLoginPasskey();
   const authenticateOAuth = useAuthenticateOAuth();
@@ -426,18 +418,6 @@ export default function LandingPage() {
             {/* Terms Notification - Only show if not in OTP verify */}
             {otpStep === 'send' && (
               <div className="space-y-3">
-                <label className="flex items-start gap-2 text-xs text-gray-500 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={marketingConsent}
-                    onChange={(e) => {
-                      setMarketingConsent(e.target.checked);
-                      localStorage.setItem("marketingConsent", String(e.target.checked));
-                    }}
-                    className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-500 focus:ring-blue-500"
-                  />
-                  <span>I agree to receive marketing emails from ZeroDev</span>
-                </label>
                 <p className="text-xs text-gray-500 text-left">
                   By continuing, you agree to our <a href="https://zerodev.app/terms-of-service" className="text-blue-500 hover:text-blue-700 underline">Terms of Service</a> and <a href="https://zerodev.app/privacy-policy" className="text-blue-500 hover:text-blue-700 underline">ZeroDev Privacy Policy</a>
                 </p>
