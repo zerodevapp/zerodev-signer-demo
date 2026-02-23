@@ -47,8 +47,8 @@ export function SigningTest() {
   // Wagmi hooks
   const { address } = useAccount();
   // const publicClient = usePublicClient()
-  const { signMessage, data: messageSignature, isPending: isSigningMessage, isSuccess: isMessageSuccess } = useSignMessage();
-  const { signTypedData, data: typedDataSignature, isPending: isSigningTypedData, isSuccess: isTypedDataSuccess } = useSignTypedData();
+  const { signMessage, data: messageSignature, isPending: isSigningMessage, isSuccess: isMessageSuccess, error: signError } = useSignMessage();
+  const { signTypedData, data: typedDataSignature, isPending: isSigningTypedData, isSuccess: isTypedDataSuccess, error: typedDataError } = useSignTypedData();
   console.log("messageSignature", messageSignature);
   console.log("isMessageSuccess", isMessageSuccess);
   console.log("typedDataSignature", typedDataSignature);
@@ -172,12 +172,12 @@ export function SigningTest() {
       </button>
 
       {/* Error */}
-      {error && (
+      {(error || signError || typedDataError) && (
         <div className="flex items-start gap-2 px-4 py-3 bg-red-50 border border-red-100 rounded-lg">
           <AlertCircle className="h-4 w-4 text-red-600 mt-0.5" />
           <div>
             <p className="text-sm font-medium text-red-900">Signing Failed</p>
-            <p className="text-sm text-red-700 mt-0.5">{error}</p>
+            <p className="text-sm text-red-700 mt-0.5">{error || signError?.message || typedDataError?.message}</p>
           </div>
         </div>
       )}
