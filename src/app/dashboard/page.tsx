@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useGetUserEmail } from "@zerodev/wallet-react";
 import {
   Check,
@@ -49,10 +49,10 @@ export default function DashboardPage() {
   const { disconnectAsync: logout } = useDisconnect();
   const { data: userEmail, isLoading: isUserEmailLoading } = useGetUserEmail({})
 
-  const { mutate: submitMarketingConsent, isPending: isSubmittingMarketingConsent } = useMutation(
+  useQuery(
     {
-      mutationKey: ["submitMarketingConsent", userEmail?.email],
-      mutationFn: async () => {
+      queryKey: ["submitMarketingConsent", userEmail?.email],
+      queryFn: async () => {
         const email = userEmail?.email
         if (!email) {
           return;
@@ -61,23 +61,14 @@ export default function DashboardPage() {
         await submitToHubSpot(email, true)
         return true
       },
+      enabled: !!userEmail?.email && !isUserEmailLoading,
+      staleTime: Infinity,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
     }
   )
-  const queryClient = useQueryClient()
-
-  // Submit marketing consent to HubSpot after login
-  useEffect(() => {
-    if(isUserEmailLoading || isSubmittingMarketingConsent) {
-      return;
-    }
-    if(!userEmail?.email) {
-      console.warn("User email not available");
-      return;
-    }
-    
-    submitMarketingConsent();
-  }, [submitMarketingConsent, userEmail, isUserEmailLoading, queryClient, isSubmittingMarketingConsent]);
-
+  
   useEffect(() => {
     const loadBalance = async () => {
       if (address && isAddress(address)) {
