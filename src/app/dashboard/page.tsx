@@ -66,6 +66,7 @@ export default function DashboardPage() {
       refetchOnMount: false,
       refetchOnReconnect: false,
       refetchOnWindowFocus: false,
+      retry: false,
     }
   )
   
