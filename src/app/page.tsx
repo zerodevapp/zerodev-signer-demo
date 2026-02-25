@@ -84,6 +84,7 @@ function LandingPageInner() {
       const data = await sendMagicLink.mutateAsync({
         email,
         redirectURL: `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/verify`,
+        otpCodeCustomization: { length: 6, alphanumeric: false },
       });
       console.log("data", data);
       localStorage.setItem("otpId", data.otpId);
@@ -101,7 +102,7 @@ function LandingPageInner() {
     setError("");
 
     try {
-      const data = await sendOTP.mutateAsync({ email });
+      const data = await sendOTP.mutateAsync({ email, otpCodeCustomization: { length: 6, alphanumeric: false } });
       setOtpData(data);
       setOtpStep('verify');
       setError("OTP code sent to your email");
@@ -197,7 +198,7 @@ function LandingPageInner() {
                   value={otpCode}
                   onChange={(e) => setOtpCode(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleOTPVerify()}
-                  maxLength={9}
+                  maxLength={6}
                   autoFocus
                   className={cn(
                     "w-full px-4 py-3 rounded-lg border border-gray-200 text-center font-mono text-xl tracking-[0.5em]",
