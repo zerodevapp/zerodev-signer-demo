@@ -28,6 +28,15 @@ export function ExportPrivateKeyModal({ isOpen, onClose }: ExportPrivateKeyModal
     try {
       await exportPrivateKey.mutateAsync({
         iframeContainerId,
+        iframeStyles: {
+          backgroundColor: '#ffffff',
+          color: '#1a1a1a',
+          fontSize: '14px',
+          fontFamily: 'monospace',
+          padding: '16px',
+          borderRadius: '8px',
+          width: '100%',
+        },
       });
       // Iframe will show the private key
     } catch (err) {
@@ -122,7 +131,7 @@ export function ExportPrivateKeyModal({ isOpen, onClose }: ExportPrivateKeyModal
               {/* Iframe Container - This will show the private key */}
               <div
                 id={iframeContainerId}
-                className="min-h-[200px] border-2 border-gray-200 rounded-lg bg-gray-50 p-4"
+                className="border border-gray-200 rounded-lg bg-white overflow-hidden [&>iframe]:w-full [&>iframe]:min-h-[120px] [&>iframe]:border-none [&>iframe]:block"
               >
                 {/* Turnkey iframe will inject content here */}
               </div>

@@ -103,8 +103,22 @@ export default function DashboardPage() {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
+  // Redirect to login if disconnected (session expired)
+  // Use a delay to avoid redirecting during initial reconnection
+  const [hasConnected, setHasConnected] = useState(false);
+  useEffect(() => {
+    if (status === 'connected') {
+      setHasConnected(true);
+    }
+  }, [status]);
+  useEffect(() => {
+    if (status === 'disconnected' && hasConnected) {
+      router.push("/?session_expired=true");
+    }
+  }, [status, hasConnected, router]);
+
   // Show loading while connecting or reconnecting
-  if (status === 'connecting' || status === 'reconnecting' || !address) {
+  if (status === 'connecting' || status === 'reconnecting' || status === 'disconnected' || !address) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="flex items-center gap-2">
@@ -260,6 +274,18 @@ export default function DashboardPage() {
               {activeTab === "transaction" && <SendTransactionTest />}
             </div>
           </div>
+        </div>
+
+        {/* GitHub Footer */}
+        <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-8 py-4 text-center">
+          <a
+            href="https://github.com/zerodevapp/zerodev-signer-demo"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            View source on GitHub
+          </a>
         </div>
       </div>
     </>

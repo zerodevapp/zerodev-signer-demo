@@ -25,7 +25,18 @@ export function ExportWalletModal({ isOpen, onClose }: ExportWalletModalProps) {
     await new Promise(resolve => setTimeout(resolve, 100));
 
     try {
-      await exportWallet.mutateAsync({ iframeContainerId });
+      await exportWallet.mutateAsync({
+        iframeContainerId,
+        iframeStyles: {
+          backgroundColor: '#ffffff',
+          color: '#1a1a1a',
+          fontSize: '14px',
+          fontFamily: 'monospace',
+          padding: '16px',
+          borderRadius: '8px',
+          width: '100%',
+        },
+      });
       // Iframe will show the seed phrase
     } catch (err) {
       console.error("Export error:", err);
@@ -122,7 +133,7 @@ export function ExportWalletModal({ isOpen, onClose }: ExportWalletModalProps) {
               {/* Iframe Container - This will show the seed phrase */}
               <div
                 id={iframeContainerId}
-                className="min-h-[300px] border-2 border-gray-200 rounded-lg bg-white p-4 overflow-auto"
+                className="border border-gray-200 rounded-lg bg-white overflow-hidden [&>iframe]:w-full [&>iframe]:min-h-[200px] [&>iframe]:border-none [&>iframe]:block"
               >
                 {/* Turnkey iframe will inject content here */}
               </div>

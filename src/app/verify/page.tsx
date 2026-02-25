@@ -2,18 +2,18 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useVerifyOTP } from '@zerodev/wallet-react';
+import { useVerifyMagicLink } from '@zerodev/wallet-react';
 
 function VerifyContent() {
   const searchParams = useSearchParams();
-  const verifyOTP = useVerifyOTP();
+  const verifyMagicLink = useVerifyMagicLink();
   const [verificationState, setVerificationState] = useState<'loading' | 'success' | 'error'>('loading');
   const [errorMessage, setErrorMessage] = useState<string>('');
 
   useEffect(() => {
     async function tryLoginWithBundle() {
-      const otp = searchParams.get('otp')
-      console.log('otp', otp)
+      const code = searchParams.get('code')
+      console.log('code', code)
       const otpId = localStorage.getItem("otpId");
       if (!otpId) {
         setVerificationState('error');
@@ -21,9 +21,9 @@ function VerifyContent() {
         return;
       }
 
-      if (!otp) {
+      if (!code) {
         setVerificationState('error');
-        setErrorMessage('No OTP found in URL');
+        setErrorMessage('No code found in URL');
         return;
       }
 
@@ -31,8 +31,8 @@ function VerifyContent() {
       await new Promise(resolve => setTimeout(resolve, 500));
 
       try {
-        await verifyOTP.mutateAsync({
-          code: otp,
+        await verifyMagicLink.mutateAsync({
+          code,
           otpId,
         });
 
