@@ -10,11 +10,17 @@ import {
   zeroAddress,
   isAddress,
 } from "viem";
+import { sepolia } from "wagmi/chains";
 import { useAccount, useSendTransaction, useWriteContract, usePublicClient } from "wagmi";
 
 type TransactionMode = "send-eth" | "mint-nft";
 
-const NFT_CONTRACT_ADDRESS = "0x34bE7f35132E97915633BC1fc020364EA5134863";
+// Per-chain NFT contract addresses
+const NFT_CONTRACTS: Record<number, `0x${string}`> = {
+  [sepolia.id]: "0x34bE7f35132E97915633BC1fc020364EA5134863",
+  [421614]: "0x4eae0b2130d5c3be154ebc851cd1dc0cc694b808", // Arbitrum Sepolia
+};
+
 const NFT_CONTRACT_ABI = parseAbi([
   "function mint(address _to) public",
   "function balanceOf(address owner) external view returns (uint256 balance)",
@@ -31,21 +37,21 @@ export function SendTransactionTest() {
   // Wagmi hooks
   const { address, isConnected, chain } = useAccount();
   const publicClient = usePublicClient({chainId: chain?.id});
-  const { sendTransaction, isPending: isSendingTx, data: sendTxHash } = useSendTransaction();
-  const { writeContract, isPending: isMinting, data: mintTxHash,error: mintError } = useWriteContract();
+  const { sendTransaction, isPending: isSendingTx, data: sendTxHash, error: sendError, reset: resetSendTx } = useSendTransaction();
+  const { writeContract, isPending: isMinting, data: mintTxHash, error: mintError, reset: resetMint } = useWriteContract();
 
   const loading = isSendingTx || isMinting;
-  const result = sendTxHash || mintTxHash;
+  const nftContractAddress = chain?.id ? NFT_CONTRACTS[chain.id] : undefined;
 
   // Fetch NFT balance
   const fetchNftBalance = async () => {
-    if (!isConnected || !address) return;
+    if (!isConnected || !address || !nftContractAddress) return;
 
     setLoadingBalance(true);
     try {
       if (!publicClient) return;
       const balance = await publicClient?.readContract({
-        address: NFT_CONTRACT_ADDRESS,
+        address: nftContractAddress,
         abi: NFT_CONTRACT_ABI,
         functionName: "balanceOf",
         args: [address],
@@ -102,13 +108,17 @@ export function SendTransactionTest() {
       setError("Please authenticate first");
       return;
     }
+    if (!nftContractAddress) {
+      setError("NFT minting is not available on this chain");
+      return;
+    }
 
     setError("");
 
     try {
       // Use Wagmi's useWriteContract - provider handles gasless via EIP-7702
       await writeContract({
-        address: NFT_CONTRACT_ADDRESS,
+        address: nftContractAddress,
         abi: NFT_CONTRACT_ABI,
         functionName: "mint",
         args: [address],
@@ -141,7 +151,7 @@ export function SendTransactionTest() {
       {/* Mode Selector */}
       <div className="flex gap-2 p-1 bg-gray-100 rounded-lg">
         <button
-          onClick={() => { setMode("mint-nft"); setError(""); }}
+          onClick={() => { setMode("mint-nft"); setError(""); resetSendTx(); }}
           className={cn(
             "flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all cursor-pointer",
             mode === "mint-nft" ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900"
@@ -150,7 +160,7 @@ export function SendTransactionTest() {
           Mint NFT
         </button>
         <button
-          onClick={() => { setMode("send-eth"); setError(""); }}
+          onClick={() => { setMode("send-eth"); setError(""); resetMint(); }}
           className={cn(
             "flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all cursor-pointer",
             mode === "send-eth" ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900"
@@ -160,8 +170,18 @@ export function SendTransactionTest() {
         </button>
       </div>
 
-      {/* NFT Balance (only show in mint mode) */}
-      {mode === "mint-nft" && (
+      {/* No NFT contract for current chain */}
+      {mode === "mint-nft" && !nftContractAddress && (
+        <div className="flex items-start gap-2 px-4 py-3 bg-yellow-50 border border-yellow-100 rounded-lg">
+          <AlertCircle className="h-4 w-4 text-yellow-600 mt-0.5" />
+          <p className="text-sm text-yellow-700">
+            NFT minting is not yet available on {chain?.name}. Switch to Sepolia to mint NFTs.
+          </p>
+        </div>
+      )}
+
+      {/* NFT Balance (only show in mint mode when contract exists) */}
+      {mode === "mint-nft" && nftContractAddress && (
         <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-100">
           <div>
             <p className="text-xs font-medium text-blue-500 mb-1">Your NFT Balance</p>
@@ -181,10 +201,7 @@ export function SendTransactionTest() {
       {/* Gasless Info */}
       <div className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
         <Sparkles className="h-4 w-4 text-blue-500 shrink-0 mt-0.5" />
-        <div>
-          <p className="text-sm font-medium text-blue-900">Gasless transactions are active</p>
-          <p className="text-xs text-blue-700 mt-0.5">You have 10 free transactions remaining today.</p>
-        </div>
+        <p className="text-sm font-medium text-blue-900">Gasless transactions are active</p>
       </div>
 
       {/* Form */}
@@ -231,7 +248,7 @@ export function SendTransactionTest() {
       {/* Action Button */}
       <button
         onClick={() => mode === "send-eth" ? handleSendEth() : handleMintNft()}
-        disabled={loading || (mode === "send-eth" && !recipient)}
+        disabled={loading || (mode === "send-eth" && !recipient) || (mode === "mint-nft" && !nftContractAddress)}
         style={{
           background: 'linear-gradient(white, white) padding-box, linear-gradient(to right, #22d3ee, #2563eb) border-box',
         }}
@@ -265,27 +282,25 @@ export function SendTransactionTest() {
       </button>
 
       {/* Error */}
-      {(error || mintError) && (
-        <div className="flex items-start gap-2 px-4 py-3 bg-red-50 border border-red-100 rounded-lg">
-          <AlertCircle className="h-4 w-4 text-red-600 mt-0.5" />
-          <div>
+      {(error || mintError || sendError) && (
+        <div className="flex items-start gap-2 px-4 py-3 bg-red-50 border border-red-100 rounded-lg overflow-hidden">
+          <AlertCircle className="h-4 w-4 text-red-600 mt-0.5 shrink-0" />
+          <div className="min-w-0">
             <p className="text-sm font-medium text-red-900">Transaction Failed</p>
-            <p className="text-sm text-red-700 mt-0.5">{error || mintError?.message}</p>
+            <p className="text-sm text-red-700 mt-0.5 break-words line-clamp-3">{error || (mintError as unknown as { shortMessage?: string })?.shortMessage || (sendError as unknown as { shortMessage?: string })?.shortMessage || mintError?.message || sendError?.message}</p>
           </div>
         </div>
       )}
 
-      {/* Success Result */}
-      {result && (
+      {/* Success Result - Send ETH */}
+      {mode === "send-eth" && sendTxHash && (
         <div className="space-y-2">
           <div className="flex items-center gap-2 px-4 py-3 bg-green-50 border border-green-100 rounded-lg">
             <Check className="h-4 w-4 text-green-600" />
-            <span className="text-sm text-green-700 font-medium">
-              {mode === "send-eth" ? "ETH sent successfully" : "NFT minted successfully!"}
-            </span>
+            <span className="text-sm text-green-700 font-medium">ETH sent successfully</span>
           </div>
           <a
-            href={`${chain?.blockExplorers?.default?.url}/tx/${result}`}
+            href={`${chain?.blockExplorers?.default?.url}/tx/${sendTxHash}`}
             target="_blank"
             rel="noopener noreferrer"
             className={cn(
@@ -296,14 +311,34 @@ export function SendTransactionTest() {
             <span className="text-sm text-gray-700 font-medium">View on Explorer</span>
             <ExternalLink className="h-4 w-4 text-gray-400 group-hover:text-gray-600" />
           </a>
-          {mode === "mint-nft" && (
-            <div className="px-4 py-3 bg-blue-50 border border-blue-100 rounded-lg">
-              <p className="text-sm text-blue-700">
-                NFT minted to your wallet!
-              </p>
-              <p className="text-xs text-blue-500 mt-1">Balance will update in a few seconds...</p>
-            </div>
-          )}
+        </div>
+      )}
+
+      {/* Success Result - Mint NFT */}
+      {mode === "mint-nft" && mintTxHash && (
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 px-4 py-3 bg-green-50 border border-green-100 rounded-lg">
+            <Check className="h-4 w-4 text-green-600" />
+            <span className="text-sm text-green-700 font-medium">NFT minted successfully!</span>
+          </div>
+          <a
+            href={`${chain?.blockExplorers?.default?.url}/tx/${mintTxHash}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={cn(
+              "flex items-center justify-between px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg",
+              "hover:bg-gray-100 transition-colors group"
+            )}
+          >
+            <span className="text-sm text-gray-700 font-medium">View on Explorer</span>
+            <ExternalLink className="h-4 w-4 text-gray-400 group-hover:text-gray-600" />
+          </a>
+          <div className="px-4 py-3 bg-blue-50 border border-blue-100 rounded-lg">
+            <p className="text-sm text-blue-700">
+              NFT minted to your wallet!
+            </p>
+            <p className="text-xs text-blue-500 mt-1">Balance will update in a few seconds...</p>
+          </div>
         </div>
       )}
     </div>
