@@ -4,6 +4,7 @@ import { AlertCircle, FileSignature, Loader2, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { useAccount, useSignMessage, useSignTypedData } from "wagmi";
 import { cn } from "../lib/utils";
+import { arbitrumSepolia } from "viem/chains";
 
 type SigningMode = "message" | "typedData";
 
@@ -15,7 +16,7 @@ const typedData = {
   domain: {
     name: "Ether Mail",
     version: "1",
-    chainId: 1,
+    chainId: arbitrumSepolia.id,
     verifyingContract: "0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC",
   },
   types: {
