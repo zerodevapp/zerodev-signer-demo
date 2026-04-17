@@ -2,7 +2,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useGetUserEmail } from "@zerodev/wallet-react";
+import { useAuthenticators } from "@zerodev/wallet-react";
 import {
   Check,
   Copy,
@@ -47,21 +47,21 @@ export default function DashboardPage() {
   const { address, status, chain, } = useAccount();
   const publicClient = usePublicClient({ chainId: chain?.id });
   const { disconnectAsync: logout } = useDisconnect();
-  const { data: userEmail, isLoading: isUserEmailLoading } = useGetUserEmail({})
+  const { data: authenticatorData, isLoading: isAuthenticatorDataLoading } = useAuthenticators({})
 
   useQuery(
     {
-      queryKey: ["submitMarketingConsent", userEmail?.email],
+      queryKey: ["submitMarketingConsent", authenticatorData?.emailContacts?.[0]?.Email],
       queryFn: async () => {
-        const email = userEmail?.email
+        const email = authenticatorData?.emailContacts?.[0]?.Email
         if (!email) {
-          return;
+          return null;
         }
 
         await submitToHubSpot(email, true)
         return true
       },
-      enabled: !!userEmail?.email && !isUserEmailLoading,
+      enabled: !!authenticatorData?.emailContacts?.[0]?.Email && !isAuthenticatorDataLoading,
       staleTime: Infinity,
       refetchOnMount: false,
       refetchOnReconnect: false,
