@@ -51,9 +51,9 @@ export default function DashboardPage() {
 
   useQuery(
     {
-      queryKey: ["submitMarketingConsent", authenticatorData?.emailContacts?.[0]?.Email],
+      queryKey: ["submitMarketingConsent", authenticatorData?.emailContacts?.[0]?.email],
       queryFn: async () => {
-        const email = authenticatorData?.emailContacts?.[0]?.Email
+        const email = authenticatorData?.emailContacts?.[0]?.email
         if (!email) {
           return null;
         }
@@ -61,7 +61,7 @@ export default function DashboardPage() {
         await submitToHubSpot(email, true)
         return true
       },
-      enabled: !!authenticatorData?.emailContacts?.[0]?.Email && !isAuthenticatorDataLoading,
+      enabled: !!authenticatorData?.emailContacts?.[0]?.email && !isAuthenticatorDataLoading,
       staleTime: Infinity,
       refetchOnMount: false,
       refetchOnReconnect: false,
