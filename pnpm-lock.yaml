@@ -21,8 +21,8 @@ importers:
         specifier: 0.0.1-alpha.17
         version: 0.0.1-alpha.17(viem@2.38.6(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))
       '@zerodev/wallet-react':
-        specifier: 0.0.1-alpha.18
-        version: 0.0.1-alpha.18(b4ac88ab59ebc328206d56ab0c951a02)
+        specifier: 0.0.1-alpha.19
+        version: 0.0.1-alpha.19(b4ac88ab59ebc328206d56ab0c951a02)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -1379,8 +1379,8 @@ packages:
     peerDependencies:
       viem: ^2.38.0
 
-  '@zerodev/wallet-react@0.0.1-alpha.18':
-    resolution: {integrity: sha512-WO7UfYdU31QFrpnjo9W61cTx97plNtVZv9HOQHkPXUUFQircGUMNnTH9Er6SWqdf1khOvgAoqZukIenlVcAofg==}
+  '@zerodev/wallet-react@0.0.1-alpha.19':
+    resolution: {integrity: sha512-vXYWdBg65zcTPOl6Vrs31A0t3OmE/DIcxxx8B4K3mWsMaJemwhcIQ6FbqqVgEGPk73SesAVFMtsSPW9KY2DYzQ==}
     peerDependencies:
       '@tanstack/react-query': ^5.0.0
       '@wagmi/core': ^2.22.0
@@ -5967,7 +5967,7 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  '@zerodev/wallet-react@0.0.1-alpha.18(b4ac88ab59ebc328206d56ab0c951a02)':
+  '@zerodev/wallet-react@0.0.1-alpha.19(b4ac88ab59ebc328206d56ab0c951a02)':
     dependencies:
       '@tanstack/react-query': 5.90.12(react@19.2.3)
       '@wagmi/core': 2.22.1(@tanstack/query-core@5.90.12)(@types/react@19.2.2)(react@19.2.3)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.2.3))(viem@2.38.6(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))
