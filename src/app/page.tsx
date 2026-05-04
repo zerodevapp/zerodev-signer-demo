@@ -38,7 +38,10 @@ function LandingPageInner() {
   // OTP specific state
   const [otpStep, setOtpStep] = useState<OTPStep>('send');
   const [otpCode, setOtpCode] = useState("");
-  const [otpData, setOtpData] = useState<{ otpId: string;} | null>(null);
+  const [otpData, setOtpData] = useState<{
+    otpId: string
+    otpEncryptionTargetBundle: string
+  } | null>(null);
 
   const registerPasskey = useRegisterPasskey();
   const loginPasskey = useLoginPasskey();
