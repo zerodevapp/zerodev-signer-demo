@@ -38,7 +38,10 @@ function LandingPageInner() {
   // OTP specific state
   const [otpStep, setOtpStep] = useState<OTPStep>('send');
   const [otpCode, setOtpCode] = useState("");
-  const [otpData, setOtpData] = useState<{ otpId: string;} | null>(null);
+  const [otpData, setOtpData] = useState<{
+    otpId: string
+    otpEncryptionTargetBundle: string
+  } | null>(null);
 
   const registerPasskey = useRegisterPasskey();
   const loginPasskey = useLoginPasskey();
@@ -88,6 +91,10 @@ function LandingPageInner() {
       });
       console.log("data", data);
       localStorage.setItem("otpId", data.otpId);
+      localStorage.setItem(
+        "otpEncryptionTargetBundle",
+        data.otpEncryptionTargetBundle,
+      );
       setError("Magic link sent! Check your email.");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to send magic link");
@@ -122,6 +129,7 @@ function LandingPageInner() {
       await verifyOTP.mutateAsync({
         code: otpCode,
         otpId: otpData.otpId,
+        otpEncryptionTargetBundle: otpData.otpEncryptionTargetBundle,
       });
       router.push("/dashboard");
     } catch (err) {

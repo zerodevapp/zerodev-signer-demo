@@ -15,9 +15,18 @@ function VerifyContent() {
       const code = searchParams.get('code')
       console.log('code', code)
       const otpId = localStorage.getItem("otpId");
+      const otpEncryptionTargetBundle = localStorage.getItem(
+        "otpEncryptionTargetBundle",
+      );
       if (!otpId) {
         setVerificationState('error');
         setErrorMessage('No OTP ID found');
+        return;
+      }
+
+      if (!otpEncryptionTargetBundle) {
+        setVerificationState('error');
+        setErrorMessage('No OTP encryption bundle found');
         return;
       }
 
@@ -34,6 +43,7 @@ function VerifyContent() {
         await verifyMagicLink.mutateAsync({
           code,
           otpId,
+          otpEncryptionTargetBundle,
         });
 
         setVerificationState('success');

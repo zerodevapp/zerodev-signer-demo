@@ -18,11 +18,11 @@ importers:
         specifier: ^5.0.0
         version: 5.5.3(viem@2.38.6(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))
       '@zerodev/wallet-core':
-        specifier: 0.0.1-alpha.17
-        version: 0.0.1-alpha.17(viem@2.38.6(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))
+        specifier: 0.0.1-alpha.18
+        version: 0.0.1-alpha.18(viem@2.38.6(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))
       '@zerodev/wallet-react':
-        specifier: 0.0.1-alpha.19
-        version: 0.0.1-alpha.19(b4ac88ab59ebc328206d56ab0c951a02)
+        specifier: 0.0.1-alpha.20
+        version: 0.0.1-alpha.20(47735a8c7be3329397a39e7f311a754d)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -545,6 +545,10 @@ packages:
     resolution: {integrity: sha512-gbKGcRUYIjA3/zCCNaWDciTMFI0dCkvou3TL8Zmy5Nc7sJ47a0jtOeZoTaMxkuqRo9cRhjOdZJXegxYE5FN/xw==}
     engines: {node: ^14.21.3 || >=16}
 
+  '@noble/curves@2.2.0':
+    resolution: {integrity: sha512-T/BoHgFXirb0ENSPBquzX0rcjXeM6Lo892a2jlYJkqk83LqZx0l1Of7DzlKJ6jkpvMrkHSnAcgb5JegL8SeIkQ==}
+    engines: {node: '>= 20.19.0'}
+
   '@noble/hashes@1.4.0':
     resolution: {integrity: sha512-V1JJ1WTRUqHHrOSh597hURcMqVKVGL/ea3kv0gSnEdsEZ0/+VyPghM1lMNGc00z7CIQorSvbKpuJkxvuHbvdbg==}
     engines: {node: '>= 16'}
@@ -560,6 +564,10 @@ packages:
   '@noble/hashes@1.8.0':
     resolution: {integrity: sha512-jCs9ldd7NwzpgXDIf6P3+NrHh9/sD6CQdxHyjQI+h/6rDNo88ypBxxz45UDuZHz9r3tNz7N/VInSVoVdtXEI4A==}
     engines: {node: ^14.21.3 || >=16}
+
+  '@noble/hashes@2.2.0':
+    resolution: {integrity: sha512-IYqDGiTXab6FniAgnSdZwgWbomxpy9FtYvLKs7wCUs2a8RkITG+DFGO1DM9cr+E3/RgADRpFjrKVaJ1z6sjtEg==}
+    engines: {node: '>= 20.19.0'}
 
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -1374,18 +1382,18 @@ packages:
     peerDependencies:
       viem: ^2.28.0
 
-  '@zerodev/wallet-core@0.0.1-alpha.17':
-    resolution: {integrity: sha512-gnrnY28t3gs0oPbr6bMWhxOsT1/t/ci00y9cK/h7Pc3iMEsjGKwVBtmPIjpf5SHA4tPpxmpzWElDuCdrGSa9NA==}
+  '@zerodev/wallet-core@0.0.1-alpha.18':
+    resolution: {integrity: sha512-LduDlCoUwbIAnHzceu69gwSpuAoONSaDbxFCyJkcTEZPozdonVtijAxhJ+zk2m9bsbL60FJqgycENeVTaDl3jA==}
     peerDependencies:
       viem: ^2.38.0
 
-  '@zerodev/wallet-react@0.0.1-alpha.19':
-    resolution: {integrity: sha512-vXYWdBg65zcTPOl6Vrs31A0t3OmE/DIcxxx8B4K3mWsMaJemwhcIQ6FbqqVgEGPk73SesAVFMtsSPW9KY2DYzQ==}
+  '@zerodev/wallet-react@0.0.1-alpha.20':
+    resolution: {integrity: sha512-Xtjr2VleoxpaLhWDlmx2f4kSuMm/EXRPFMIZYn+t4DCHyimdyelw4KzKdDLNVKZejbWULCNUB0pnBNLJrGeb4g==}
     peerDependencies:
       '@tanstack/react-query': ^5.0.0
       '@wagmi/core': ^2.22.0
       '@zerodev/sdk': 5.5.4
-      '@zerodev/wallet-core': 0.0.1-alpha.17
+      '@zerodev/wallet-core': 0.0.1-alpha.18
       ox: ^0.3.0
       react: ^18.0.0 || ^19.0.0
       viem: ^2.38.0
@@ -4260,6 +4268,10 @@ snapshots:
     dependencies:
       '@noble/hashes': 1.8.0
 
+  '@noble/curves@2.2.0':
+    dependencies:
+      '@noble/hashes': 2.2.0
+
   '@noble/hashes@1.4.0': {}
 
   '@noble/hashes@1.7.0': {}
@@ -4267,6 +4279,8 @@ snapshots:
   '@noble/hashes@1.7.1': {}
 
   '@noble/hashes@1.8.0': {}
+
+  '@noble/hashes@2.2.0': {}
 
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
@@ -5956,8 +5970,10 @@ snapshots:
       semver: 7.7.3
       viem: 2.38.6(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1)
 
-  '@zerodev/wallet-core@0.0.1-alpha.17(viem@2.38.6(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))':
+  '@zerodev/wallet-core@0.0.1-alpha.18(viem@2.38.6(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))':
     dependencies:
+      '@noble/curves': 2.2.0
+      '@noble/hashes': 2.2.0
       '@turnkey/http': 3.13.0
       '@turnkey/iframe-stamper': 2.7.0
       '@turnkey/indexed-db-stamper': 1.2.0
@@ -5967,12 +5983,12 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  '@zerodev/wallet-react@0.0.1-alpha.19(b4ac88ab59ebc328206d56ab0c951a02)':
+  '@zerodev/wallet-react@0.0.1-alpha.20(47735a8c7be3329397a39e7f311a754d)':
     dependencies:
       '@tanstack/react-query': 5.90.12(react@19.2.3)
       '@wagmi/core': 2.22.1(@tanstack/query-core@5.90.12)(@types/react@19.2.2)(react@19.2.3)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.2.3))(viem@2.38.6(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))
       '@zerodev/sdk': 5.5.3(viem@2.38.6(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))
-      '@zerodev/wallet-core': 0.0.1-alpha.17(viem@2.38.6(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))
+      '@zerodev/wallet-core': 0.0.1-alpha.18(viem@2.38.6(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))
       ox: 0.9.17(typescript@5.9.3)(zod@4.2.1)
       react: 19.2.3
       viem: 2.38.6(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1)
